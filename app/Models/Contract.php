@@ -35,7 +35,7 @@ class Contract extends Model
     public static function generateCode(): string
     {
         $lastContract = self::orderBy('id', 'desc')->first();
-        
+
         if (!$lastContract) {
             return 'CONT-0001';
         }
@@ -69,5 +69,13 @@ class Contract extends Model
     public function contractType(): BelongsTo
     {
         return $this->belongsTo(ContractType::class);
+    }
+
+    /**
+     * Relationship with ContractFile
+     */
+    public function files(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ContractFile::class);
     }
 }

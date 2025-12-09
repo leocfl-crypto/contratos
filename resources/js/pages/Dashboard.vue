@@ -1,24 +1,42 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { FileText, Clock, CheckCircle2, AlertCircle, TrendingUp, BarChart3 } from 'lucide-vue-next';
+import { Head, Link } from '@inertiajs/vue3';
+import { FileText, Clock, CheckCircle2, AlertCircle, TrendingUp, BarChart3, Eye } from 'lucide-vue-next';
 import ContractStatusChart from '@/components/charts/ContractStatusChart.vue';
 import ContractTimelineChart from '@/components/charts/ContractTimelineChart.vue';
 import ContractTypeChart from '@/components/charts/ContractTypeChart.vue';
 
-// Dados mockados para os gráficos (substituir por dados reais do backend)
-const statusData = {
-    active: 0,
-    pending: 0,
-    completed: 0,
-    expired: 0
+const props = defineProps({
+    stats: Object,
+    recentContracts: Array,
+    statusData: Object,
+    timelineLabels: Array,
+    timelineData: Array,
+    typeLabels: Array,
+    typeData: Array,
+});
+
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    }).format(value);
 };
 
-const timelineLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-const timelineData = [0, 0, 0, 0, 0, 0];
+const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('pt-BR');
+};
 
-const typeLabels = ['Tipo A', 'Tipo B', 'Tipo C'];
-const typeData = [0, 0, 0];
+const getStatusClass = (status) => {
+    const classes = {
+        'Ativo': 'bg-green-100 text-green-800',
+        'Pendente': 'bg-yellow-100 text-yellow-800',
+        'Em Análise': 'bg-blue-100 text-blue-800',
+        'Suspenso': 'bg-orange-100 text-orange-800',
+        'Encerrado': 'bg-gray-100 text-gray-800',
+    };
+    return classes[status] || 'bg-gray-100 text-gray-800';
+};
 </script>
 
 <template>
@@ -40,15 +58,15 @@ const typeData = [0, 0, 0];
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-primary-100">Contratos Ativos</p>
-                                <p class="mt-2 text-4xl font-bold">0</p>
+                                <p class="mt-2 text-4xl font-bold">{{ stats?.active || 0 }}</p>
                             </div>
                             <div class="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
                                 <FileText :size="32" class="text-white" />
                             </div>
                         </div>
                         <div class="mt-4 flex items-center text-sm text-primary-100">
-                            <span class="font-semibold text-white">-</span>
-                            <span class="ml-2">Nenhum contrato cadastrado</span>
+                            <span class="font-semibold text-white">{{ stats?.total || 0 }}</span>
+                            <span class="ml-2">contratos no total</span>
                         </div>
                     </div>
 
@@ -57,15 +75,14 @@ const typeData = [0, 0, 0];
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-yellow-100">Pendentes</p>
-                                <p class="mt-2 text-4xl font-bold">0</p>
+                                <p class="mt-2 text-4xl font-bold">{{ stats?.pending || 0 }}</p>
                             </div>
                             <div class="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
                                 <Clock :size="32" class="text-white" />
                             </div>
                         </div>
                         <div class="mt-4 flex items-center text-sm text-yellow-100">
-                            <span class="font-semibold text-white">-</span>
-                            <span class="ml-2">Nenhum contrato cadastrado</span>
+                            <span class="ml-0">Aguardando análise</span>
                         </div>
                     </div>
 
@@ -73,16 +90,15 @@ const typeData = [0, 0, 0];
                     <div class="group animate-slide-up rounded-2xl bg-gradient-to-br from-accent-500 to-emerald-600 p-6 text-white shadow-accent transition-all duration-300 hover:-translate-y-2 hover:shadow-xl" style="animation-delay: 0.2s;">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-green-100">Concluídos</p>
-                                <p class="mt-2 text-4xl font-bold">0</p>
+                                <p class="text-sm font-medium text-green-100">Encerrados</p>
+                                <p class="mt-2 text-4xl font-bold">{{ stats?.completed || 0 }}</p>
                             </div>
                             <div class="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
                                 <CheckCircle2 :size="32" class="text-white" />
                             </div>
                         </div>
                         <div class="mt-4 flex items-center text-sm text-green-100">
-                            <span class="font-semibold text-white">-</span>
-                            <span class="ml-2">Nenhum contrato cadastrado</span>
+                            <span class="ml-0">Contratos finalizados</span>
                         </div>
                     </div>
 
@@ -91,15 +107,14 @@ const typeData = [0, 0, 0];
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-red-100">Vencendo em 30 dias</p>
-                                <p class="mt-2 text-4xl font-bold">0</p>
+                                <p class="mt-2 text-4xl font-bold">{{ stats?.expiring || 0 }}</p>
                             </div>
                             <div class="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
                                 <AlertCircle :size="32" class="text-white" />
                             </div>
                         </div>
                         <div class="mt-4 flex items-center text-sm text-red-100">
-                            <span class="font-semibold text-white">-</span>
-                            <span class="ml-2">Nenhum contrato cadastrado</span>
+                            <span class="ml-0">Atenção necessária</span>
                         </div>
                     </div>
                 </div>
@@ -112,39 +127,66 @@ const typeData = [0, 0, 0];
                         </div>
                         <div class="p-6">
                             <div class="space-y-3">
-                                <button class="w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-4 py-3 text-left text-sm font-medium text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+                                <Link :href="route('contracts.create')" class="block w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-4 py-3 text-left text-sm font-medium text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
                                     <div class="flex items-center gap-3">
                                         <FileText :size="20" />
                                         <span>Novo Contrato</span>
                                     </div>
-                                </button>
-                                <button class="w-full rounded-lg border-2 border-primary-200 bg-white px-4 py-3 text-left text-sm font-medium text-primary-700 transition-all duration-200 hover:border-primary-300 hover:bg-primary-50">
+                                </Link>
+                                <Link :href="route('contracts.index')" class="block w-full rounded-lg border-2 border-primary-200 bg-white px-4 py-3 text-left text-sm font-medium text-primary-700 transition-all duration-200 hover:border-primary-300 hover:bg-primary-50">
                                     <div class="flex items-center gap-3">
                                         <Clock :size="20" />
                                         <span>Revisar Pendentes</span>
                                     </div>
-                                </button>
-                                <button class="w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-left text-sm font-medium text-gray-700 transition-all duration-200 hover:border-gray-300 hover:bg-gray-50">
+                                </Link>
+                                <Link :href="route('contracts.index')" class="block w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-left text-sm font-medium text-gray-700 transition-all duration-200 hover:border-gray-300 hover:bg-gray-50">
                                     <div class="flex items-center gap-3">
                                         <AlertCircle :size="20" />
-                                        <span>Ver Alertas</span>
+                                        <span>Ver Todos</span>
                                     </div>
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     </div>
 
                     <!-- Recent Activity -->
                     <div class="animate-slide-up overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-xl lg:col-span-2" style="animation-delay: 0.5s;">
-                        <div class="border-b border-gray-200 bg-gradient-to-r from-secondary-50 to-primary-50 px-6 py-4">
+                        <div class="border-b border-gray-200 bg-gradient-to-r from-secondary-50 to-primary-50 px-6 py-4 flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-900">Contratos Recentes</h3>
+                            <Link :href="route('contracts.index')" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                                Ver todos
+                            </Link>
                         </div>
-                        <div class="p-12 text-center">
+                        <div v-if="!recentContracts || recentContracts.length === 0" class="p-12 text-center">
                             <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                                 <FileText :size="32" class="text-gray-400" />
                             </div>
                             <h3 class="mb-2 text-lg font-semibold text-gray-900">Nenhum contrato cadastrado</h3>
                             <p class="text-sm text-gray-600">Comece cadastrando seu primeiro contrato usando o botão "Novo Contrato" acima.</p>
+                        </div>
+                        <div v-else class="divide-y divide-gray-100">
+                            <div v-for="contract in recentContracts" :key="contract.id" class="p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100">
+                                            <FileText class="h-5 w-5 text-indigo-600" />
+                                        </div>
+                                        <div>
+                                            <p class="font-mono text-sm font-medium text-gray-900">{{ contract.code }}</p>
+                                            <p class="text-sm text-gray-500 truncate max-w-xs">{{ contract.title }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <span :class="getStatusClass(contract.status)" class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium">
+                                            {{ contract.status }}
+                                        </span>
+                                        <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(contract.total) }}</span>
+                                        <Link :href="route('contracts.show', contract.id)" class="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-indigo-600 transition">
+                                            <Eye class="h-4 w-4" />
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,7 +219,7 @@ const typeData = [0, 0, 0];
                                     <ContractStatusChart :data="statusData" />
                                 </div>
                                 <p class="mt-4 text-center text-sm text-gray-500">
-                                    Nenhum dado disponível
+                                    {{ stats?.total > 0 ? 'Total: ' + stats.total + ' contratos' : 'Nenhum dado disponível' }}
                                 </p>
                             </div>
                         </div>

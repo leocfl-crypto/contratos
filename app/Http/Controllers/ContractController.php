@@ -83,10 +83,11 @@ class ContractController extends Controller
      */
     public function show(Contract $contract)
     {
-        $contract->load(['user', 'supplier', 'contractType']);
+        $contract->load(['user', 'supplier', 'contractType', 'files']);
 
         return Inertia::render('Contracts/Show', [
             'contract' => $contract,
+            'fileTypeOptions' => \App\Models\ContractFile::TYPES,
         ]);
     }
 
