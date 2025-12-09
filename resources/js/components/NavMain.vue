@@ -34,10 +34,7 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
 </script>
 
 <template>
-    <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel class="text-xs font-bold text-sidebar-foreground/60 uppercase tracking-widest mb-3 px-2">
-            Menu Principal
-        </SidebarGroupLabel>
+    <SidebarGroup class="px-3 py-2">
         <SidebarMenu class="space-y-1">
             <template v-for="item in items" :key="item.title">
                 <!-- Item com submenu -->
@@ -45,45 +42,33 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
                     <SidebarMenuButton
                         @click="toggleItem(item.title)"
                         :tooltip="item.title"
-                        class="group/menu-item relative overflow-hidden transition-all duration-300 hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-accent/50 rounded-xl"
+                        class="nav-item"
                     >
-                        <div class="flex items-center gap-3 relative z-10">
-                            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500/10 to-primary-600/10 group-hover/menu-item:from-primary-500/20 group-hover/menu-item:to-primary-600/20 transition-all duration-300">
-                                <component :is="item.icon" class="h-5 w-5 text-primary-600 transition-all duration-300 group-hover/menu-item:scale-110 group-hover/menu-item:rotate-3" />
-                            </div>
-                            <span class="font-semibold text-sidebar-foreground">{{ item.title }}</span>
-                        </div>
+                        <component :is="item.icon" class="nav-icon" />
+                        <span class="nav-text">{{ item.title }}</span>
                         <ChevronRight 
-                            class="ml-auto transition-all duration-500 ease-out relative z-10"
-                            :class="isExpanded(item.title) ? 'rotate-90 text-primary-600' : 'text-sidebar-foreground/50'"
+                            class="nav-chevron"
+                            :class="isExpanded(item.title) ? 'rotate-90' : ''"
                         />
-                        <!-- Glassmorphism effect on hover -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover/menu-item:from-primary-500/5 group-hover/menu-item:to-primary-600/5 transition-all duration-300 rounded-xl"></div>
                     </SidebarMenuButton>
                     <Transition
-                        enter-active-class="transition-all duration-300 ease-out"
-                        enter-from-class="opacity-0 max-h-0 -translate-y-2"
-                        enter-to-class="opacity-100 max-h-96 translate-y-0"
-                        leave-active-class="transition-all duration-200 ease-in"
-                        leave-from-class="opacity-100 max-h-96 translate-y-0"
-                        leave-to-class="opacity-0 max-h-0 -translate-y-2"
+                        enter-active-class="transition-all duration-200 ease-out"
+                        enter-from-class="opacity-0 -translate-y-1"
+                        enter-to-class="opacity-100 translate-y-0"
+                        leave-active-class="transition-all duration-150 ease-in"
+                        leave-from-class="opacity-100 translate-y-0"
+                        leave-to-class="opacity-0 -translate-y-1"
                     >
-                        <SidebarMenuSub v-show="isExpanded(item.title)" class="overflow-hidden ml-2 mt-1 space-y-1">
+                        <SidebarMenuSub v-show="isExpanded(item.title)" class="nav-submenu">
                             <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
                                 <SidebarMenuSubButton
                                     as-child
                                     :is-active="urlIsActive(subItem.href!, page.url)"
-                                    class="group/sub-item relative overflow-hidden transition-all duration-300 hover:bg-gradient-to-r hover:from-sidebar-accent/60 hover:to-sidebar-accent/30 hover:translate-x-2 rounded-lg data-[active=true]:bg-gradient-to-r data-[active=true]:from-primary-500/20 data-[active=true]:to-primary-600/10"
+                                    class="nav-subitem"
                                 >
                                     <Link :href="subItem.href!">
-                                        <div class="flex items-center gap-3 relative z-10">
-                                            <div class="flex h-7 w-7 items-center justify-center rounded-md bg-sidebar-accent/50 group-hover/sub-item:bg-primary-500/10 transition-all duration-300">
-                                                <component :is="subItem.icon" class="h-4 w-4 transition-all duration-300 group-hover/sub-item:scale-110" />
-                                            </div>
-                                            <span class="text-sm">{{ subItem.title }}</span>
-                                        </div>
-                                        <!-- Active indicator -->
-                                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-gradient-to-b from-primary-500 to-primary-600 rounded-r-full transition-all duration-300 group-data-[active=true]/sub-item:h-8"></div>
+                                        <component :is="subItem.icon" class="nav-subicon" />
+                                        <span>{{ subItem.title }}</span>
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -97,19 +82,11 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
                         as-child
                         :is-active="urlIsActive(item.href!, page.url)"
                         :tooltip="item.title"
-                        class="group/menu-item relative overflow-hidden transition-all duration-300 hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-accent/50 hover:translate-x-1 rounded-xl data-[active=true]:bg-gradient-to-r data-[active=true]:from-primary-500/20 data-[active=true]:to-primary-600/10"
+                        class="nav-item"
                     >
                         <Link :href="item.href!">
-                            <div class="flex items-center gap-3 relative z-10">
-                                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500/10 to-primary-600/10 group-hover/menu-item:from-primary-500/20 group-hover/menu-item:to-primary-600/20 group-data-[active=true]/menu-item:from-primary-500/30 group-data-[active=true]/menu-item:to-primary-600/30 transition-all duration-300">
-                                    <component :is="item.icon" class="h-5 w-5 text-primary-600 transition-all duration-300 group-hover/menu-item:scale-110 group-hover/menu-item:rotate-3" />
-                                </div>
-                                <span class="font-semibold text-sidebar-foreground">{{ item.title }}</span>
-                            </div>
-                            <!-- Active indicator -->
-                            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-gradient-to-b from-primary-500 to-primary-600 rounded-r-full transition-all duration-300 group-data-[active=true]/menu-item:h-10"></div>
-                            <!-- Glassmorphism effect -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-primary-500/0 to-primary-600/0 group-hover/menu-item:from-primary-500/5 group-hover/menu-item:to-primary-600/5 transition-all duration-300 rounded-xl"></div>
+                            <component :is="item.icon" class="nav-icon" />
+                            <span class="nav-text">{{ item.title }}</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -117,3 +94,82 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
         </SidebarMenu>
     </SidebarGroup>
 </template>
+
+<style scoped>
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    color: hsl(220 9% 46%);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    background: hsl(220 14% 96%);
+    color: hsl(220 9% 20%);
+}
+
+.nav-item[data-active="true"] {
+    background: linear-gradient(135deg, hsl(262 83% 58% / 0.1) 0%, hsl(262 83% 58% / 0.05) 100%);
+    color: hsl(262 83% 58%);
+}
+
+.nav-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+}
+
+.nav-text {
+    flex: 1;
+}
+
+.nav-chevron {
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.5;
+    transition: transform 0.2s ease;
+}
+
+.nav-submenu {
+    margin-left: 1.5rem;
+    margin-top: 0.25rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid hsl(220 13% 91%);
+}
+
+.nav-subitem {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.375rem;
+    color: hsl(220 9% 46%);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    transition: all 0.15s ease;
+}
+
+.nav-subitem:hover {
+    background: hsl(220 14% 96%);
+    color: hsl(220 9% 20%);
+}
+
+.nav-subitem[data-active="true"] {
+    background: hsl(262 83% 58% / 0.08);
+    color: hsl(262 83% 58%);
+    font-weight: 500;
+}
+
+.nav-subicon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+</style>
