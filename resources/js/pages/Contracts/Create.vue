@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import InputLabel from '@/components/InputLabel.vue';
 import InputError from '@/components/InputError.vue';
@@ -16,6 +16,7 @@ const props = defineProps({
 });
 
 const form = useForm({
+    code: '',
     title: '',
     description: '',
     supplier_id: '',
@@ -49,26 +50,30 @@ const submit = () => {
 <template>
     <Head title="Novo Contrato" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Novo Contrato
-            </h2>
-        </template>
-
-        <div class="py-12">
+    <AppLayout>
+        <div class="py-6">
             <div class="mx-auto max-w-4xl sm:px-6 lg:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <!-- Contract Code Display -->
-                        <div class="mb-6 rounded-lg bg-blue-50 p-4">
-                            <p class="text-sm text-blue-800">
-                                <strong>Código do Contrato:</strong>
-                                <span class="ml-2 font-mono text-lg">{{ nextCode }}</span>
-                            </p>
-                        </div>
-
                         <form @submit.prevent="submit" class="space-y-6">
+                            <!-- Contract Code -->
+                            <div>
+                                <InputLabel for="code" value="Código do Contrato *" />
+                                <Input
+                                    id="code"
+                                    v-model="form.code"
+                                    type="text"
+                                    class="mt-1 block w-full font-mono"
+                                    required
+                                    autofocus
+                                    :placeholder="nextCode"
+                                />
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Sugestão: {{ nextCode }}
+                                </p>
+                                <InputError :message="form.errors.code" class="mt-2" />
+                            </div>
+
                             <!-- Title -->
                             <div>
                                 <InputLabel for="title" value="Título *" />
@@ -78,7 +83,6 @@ const submit = () => {
                                     type="text"
                                     class="mt-1 block w-full"
                                     required
-                                    autofocus
                                     placeholder="Digite o título do contrato"
                                 />
                                 <InputError :message="form.errors.title" class="mt-2" />
@@ -233,5 +237,5 @@ const submit = () => {
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AppLayout>
 </template>

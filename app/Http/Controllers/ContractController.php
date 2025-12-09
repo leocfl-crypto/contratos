@@ -50,6 +50,7 @@ class ContractController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'code' => 'required|string|max:255|unique:contracts,code',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'supplier_id' => 'required|exists:suppliers,id',
@@ -61,7 +62,7 @@ class ContractController extends Controller
         ]);
 
         $contract = Contract::create([
-            'code' => Contract::generateCode(),
+            'code' => $validated['code'],
             'user_id' => auth()->id(),
             'title' => $validated['title'],
             'description' => $validated['description'],
