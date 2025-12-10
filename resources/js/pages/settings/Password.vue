@@ -89,8 +89,11 @@ const breadcrumbItems: BreadcrumbItem[] = [
                         <Button
                             :disabled="processing"
                             data-test="update-password-button"
-                            >Salvar senha</Button
+                            size="lg"
+                            class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 px-8"
                         >
+                            Salvar senha
+                        </Button>
 
                         <Transition
                             enter-active-class="transition ease-in-out"
@@ -100,9 +103,9 @@ const breadcrumbItems: BreadcrumbItem[] = [
                         >
                             <p
                                 v-show="recentlySuccessful"
-                                class="text-sm text-neutral-600"
+                                class="text-sm font-medium text-green-600"
                             >
-                                Salvo.
+                                ✓ Salvo com sucesso!
                             </p>
                         </Transition>
                     </div>
