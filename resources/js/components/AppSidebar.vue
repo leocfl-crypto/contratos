@@ -87,8 +87,11 @@ const mainNavItems: NavItem[] = [
                             <div class="flex items-center gap-3 w-full">
                                 <AppLogo class="h-8 w-8" />
                                 <div class="flex flex-col flex-1 min-w-0">
-                                    <span class="truncate font-bold text-lg leading-tight">
-                                        Laravel
+                                    <span class="truncate font-bold text-lg leading-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                        DocManager
+                                    </span>
+                                    <span class="text-xs text-muted-foreground tracking-wide">
+                                        Gestão de Contratos
                                     </span>
                                 </div>
                             </div>
@@ -102,9 +105,7 @@ const mainNavItems: NavItem[] = [
             <NavMain :items="mainNavItems" />
         </SidebarContent>
 
-        <SidebarFooter class="sidebar-footer">
-            <NavUser />
-        </SidebarFooter>
+        <!-- User menu movido para o header -->
     </Sidebar>
     <slot />
 </template>
