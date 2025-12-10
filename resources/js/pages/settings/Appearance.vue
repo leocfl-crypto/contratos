@@ -5,9 +5,9 @@ import AppearanceTabs from '@/components/AppearanceTabs.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import { type BreadcrumbItem } from '@/types';
 
-import AppLayout from '@/layouts/AppLayout.vue';
+
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { edit } from '@/routes/appearance';
+import { edit } from '@/routes/settings/appearance';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -18,10 +18,9 @@ const breadcrumbItems: BreadcrumbItem[] = [
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Appearance settings" />
+    <Head title="Appearance settings" />
 
-        <SettingsLayout>
+    <SettingsLayout :breadcrumbs="breadcrumbItems">
             <div class="space-y-6">
                 <HeadingSmall
                     title="Appearance settings"
@@ -29,6 +28,5 @@ const breadcrumbItems: BreadcrumbItem[] = [
                 />
                 <AppearanceTabs />
             </div>
-        </SettingsLayout>
-    </AppLayout>
+    </SettingsLayout>
 </template>

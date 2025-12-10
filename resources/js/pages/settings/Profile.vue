@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import { edit } from '@/routes/profile';
+import { edit } from '@/routes/settings/profile';
 import { send } from '@/routes/verification';
 import { Form, Head, Link, usePage } from '@inertiajs/vue3';
 
@@ -10,7 +10,7 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/AppLayout.vue';
+
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { type BreadcrumbItem } from '@/types';
 
@@ -23,7 +23,7 @@ defineProps<Props>();
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
-        title: 'Profile settings',
+        title: 'Configurações de Perfil',
         href: edit().url,
     },
 ];
@@ -33,14 +33,13 @@ const user = page.props.auth.user;
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Profile settings" />
+    <Head title="Configurações de Perfil" />
 
-        <SettingsLayout>
+    <SettingsLayout :breadcrumbs="breadcrumbItems">
             <div class="flex flex-col space-y-6">
                 <HeadingSmall
-                    title="Profile information"
-                    description="Update your name and email address"
+                    title="Informações do Perfil"
+                    description="Atualize seu nome e endereço de e-mail"
                 />
 
                 <Form
@@ -49,7 +48,7 @@ const user = page.props.auth.user;
                     v-slot="{ errors, processing, recentlySuccessful }"
                 >
                     <div class="grid gap-2">
-                        <Label for="name">Name</Label>
+                        <Label for="name">Nome</Label>
                         <Input
                             id="name"
                             class="mt-1 block w-full"
@@ -57,13 +56,13 @@ const user = page.props.auth.user;
                             :default-value="user.name"
                             required
                             autocomplete="name"
-                            placeholder="Full name"
+                            placeholder="Nome completo"
                         />
                         <InputError class="mt-2" :message="errors.name" />
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="email">Email address</Label>
+                        <Label for="email">Endereço de e-mail</Label>
                         <Input
                             id="email"
                             type="email"
@@ -72,20 +71,20 @@ const user = page.props.auth.user;
                             :default-value="user.email"
                             required
                             autocomplete="username"
-                            placeholder="Email address"
+                            placeholder="Endereço de e-mail"
                         />
                         <InputError class="mt-2" :message="errors.email" />
                     </div>
 
                     <div v-if="mustVerifyEmail && !user.email_verified_at">
                         <p class="-mt-4 text-sm text-muted-foreground">
-                            Your email address is unverified.
+                            Seu endereço de e-mail não está verificado.
                             <Link
                                 :href="send()"
                                 as="button"
                                 class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current!"
                             >
-                                Click here to resend the verification email.
+                                Clique aqui para reenviar o e-mail de verificação.
                             </Link>
                         </p>
 
@@ -93,8 +92,7 @@ const user = page.props.auth.user;
                             v-if="status === 'verification-link-sent'"
                             class="mt-2 text-sm font-medium text-green-600"
                         >
-                            A new verification link has been sent to your email
-                            address.
+                            Um novo link de verificação foi enviado para o seu endereço de e-mail.
                         </div>
                     </div>
 
@@ -102,7 +100,9 @@ const user = page.props.auth.user;
                         <Button
                             :disabled="processing"
                             data-test="update-profile-button"
-                            >Save</Button
+                            size="lg"
+                            class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 px-8"
+                            >Salvar Alterações</Button
                         >
 
                         <Transition
@@ -113,9 +113,9 @@ const user = page.props.auth.user;
                         >
                             <p
                                 v-show="recentlySuccessful"
-                                class="text-sm text-neutral-600"
+                                class="text-sm font-medium text-green-600"
                             >
-                                Saved.
+                                ✓ Salvo com sucesso!
                             </p>
                         </Transition>
                     </div>
@@ -123,6 +123,5 @@ const user = page.props.auth.user;
             </div>
 
             <DeleteUser />
-        </SettingsLayout>
-    </AppLayout>
+    </SettingsLayout>
 </template>
