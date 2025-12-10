@@ -59,6 +59,10 @@ class ContractController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'total' => 'required|numeric|min:0',
+            'manager' => 'nullable|string|max:255',
+            'deputy_manager' => 'nullable|string|max:255',
+            'inspector' => 'nullable|string|max:255',
+            'deputy_inspector' => 'nullable|string|max:255',
         ]);
 
         $contract = Contract::create([
@@ -72,6 +76,10 @@ class ContractController extends Controller
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             'total' => $validated['total'],
+            'manager' => $validated['manager'],
+            'deputy_manager' => $validated['deputy_manager'],
+            'inspector' => $validated['inspector'],
+            'deputy_inspector' => $validated['deputy_inspector'],
         ]);
 
         return redirect()->route('dashboard')
@@ -124,6 +132,10 @@ class ContractController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'total' => 'required|numeric|min:0',
+            'manager' => 'nullable|string|max:255',
+            'deputy_manager' => 'nullable|string|max:255',
+            'inspector' => 'nullable|string|max:255',
+            'deputy_inspector' => 'nullable|string|max:255',
         ]);
 
         $contract->update($validated);

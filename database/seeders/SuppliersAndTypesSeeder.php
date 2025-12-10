@@ -13,15 +13,13 @@ class SuppliersAndTypesSeeder extends Seeder
      */
     public function run(): void
     {
+        // Limpar tipos de contrato existentes
+        ContractType::query()->delete();
+
         // Tipos de Contrato
         $contractTypes = [
-            ['name' => 'Prestação de Serviços', 'description' => 'Contrato para prestação de serviços diversos'],
-            ['name' => 'Fornecimento de Materiais', 'description' => 'Contrato para fornecimento de materiais e produtos'],
-            ['name' => 'Locação', 'description' => 'Contrato de locação de equipamentos ou imóveis'],
-            ['name' => 'Consultoria', 'description' => 'Contrato de consultoria especializada'],
-            ['name' => 'Manutenção', 'description' => 'Contrato de manutenção preventiva ou corretiva'],
-            ['name' => 'Licenciamento de Software', 'description' => 'Contrato de licença de uso de software'],
-            ['name' => 'Obras e Reformas', 'description' => 'Contrato para execução de obras e reformas'],
+            ['name' => 'Serviço', 'description' => 'Contrato de serviço'],
+            ['name' => 'Bens Móveis', 'description' => 'Contrato de bens móveis'],
         ];
 
         foreach ($contractTypes as $type) {

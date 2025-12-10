@@ -85,9 +85,24 @@ Route::middleware('auth')->group(function () {
     // Contract Files routes
     Route::post('/contratos/{contract}/arquivos', [App\Http\Controllers\ContractFileController::class, 'store'])->name('contract-files.store');
     Route::get('/contratos/arquivos/{file}/download', [App\Http\Controllers\ContractFileController::class, 'download'])->name('contract-files.download');
+    Route::get('/contratos/arquivos/{file}/preview', [App\Http\Controllers\ContractFileController::class, 'preview'])->name('contract-files.preview');
     Route::delete('/contratos/arquivos/{file}', [App\Http\Controllers\ContractFileController::class, 'destroy'])->name('contract-files.destroy');
 
-    // Profile routes
+    // Settings routes
+    Route::prefix('settings')->group(function () {
+        Route::get('/profile', [App\Http\Controllers\Settings\ProfileController::class, 'edit'])->name('settings.profile.edit');
+        Route::patch('/profile', [App\Http\Controllers\Settings\ProfileController::class, 'update'])->name('settings.profile.update');
+        Route::delete('/profile', [App\Http\Controllers\Settings\ProfileController::class, 'destroy'])->name('settings.profile.destroy');
+
+        Route::get('/password', [App\Http\Controllers\Settings\PasswordController::class, 'edit'])->name('settings.password.edit');
+        Route::patch('/password', [App\Http\Controllers\Settings\PasswordController::class, 'update'])->name('settings.password.update');
+
+        Route::get('/appearance', [App\Http\Controllers\Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
+
+        Route::get('/two-factor', [App\Http\Controllers\Settings\TwoFactorAuthenticationController::class, 'show'])->name('settings.two-factor.show');
+    });
+
+    // Profile routes (legacy compatibility)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

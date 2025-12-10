@@ -47,6 +47,27 @@ class ContractFileController extends Controller
     }
 
     /**
+     * Preview/view a contract file inline in browser.
+     */
+    public function preview(ContractFile $file): StreamedResponse
+    {
+        if (!Storage::disk('local')->exists($file->file_path)) {
+            abort(404, 'Arquivo não encontrado.');
+        }
+
+        return new StreamedResponse(function () use ($file) {
+            $stream = Storage::disk('local')->readStream($file->file_path);
+            fpassthru($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, 200, [
+            'Content-Type' => $file->mime_type,
+            'Content-Disposition' => 'inline; filename="' . $file->original_name . '"',
+        ]);
+    }
+
+    /**
      * Delete a contract file.
      */
     public function destroy(ContractFile $file)

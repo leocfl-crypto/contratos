@@ -24,6 +24,10 @@ const form = useForm({
     start_date: props.contract.start_date.split('T')[0],
     end_date: props.contract.end_date.split('T')[0],
     total: props.contract.total,
+    manager: props.contract.manager || '',
+    deputy_manager: props.contract.deputy_manager || '',
+    inspector: props.contract.inspector || '',
+    deputy_inspector: props.contract.deputy_inspector || '',
 });
 
 const submit = () => {
@@ -98,6 +102,64 @@ const submit = () => {
                                     placeholder="Digite uma descrição detalhada do contrato"
                                 ></textarea>
                                 <InputError :message="form.errors.description" class="mt-2" />
+                            </div>
+
+                            <!-- Two Column Layout for Manager and Deputy Manager -->
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <!-- Manager -->
+                                <div>
+                                    <InputLabel for="manager" value="Gestor" />
+                                    <Input
+                                        id="manager"
+                                        v-model="form.manager"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        placeholder="Digite o nome do gestor"
+                                    />
+                                    <InputError :message="form.errors.manager" class="mt-2" />
+                                </div>
+
+                                <!-- Deputy Manager -->
+                                <div>
+                                    <InputLabel for="deputy_manager" value="Gestor Suplente" />
+                                    <Input
+                                        id="deputy_manager"
+                                        v-model="form.deputy_manager"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        placeholder="Digite o nome do gestor suplente"
+                                    />
+                                    <InputError :message="form.errors.deputy_manager" class="mt-2" />
+                                </div>
+                            </div>
+
+                            <!-- Two Column Layout for Inspector and Deputy Inspector -->
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <!-- Inspector -->
+                                <div>
+                                    <InputLabel for="inspector" value="Fiscal" />
+                                    <Input
+                                        id="inspector"
+                                        v-model="form.inspector"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        placeholder="Digite o nome do fiscal"
+                                    />
+                                    <InputError :message="form.errors.inspector" class="mt-2" />
+                                </div>
+
+                                <!-- Deputy Inspector -->
+                                <div>
+                                    <InputLabel for="deputy_inspector" value="Fiscal Suplente" />
+                                    <Input
+                                        id="deputy_inspector"
+                                        v-model="form.deputy_inspector"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        placeholder="Digite o nome do fiscal suplente"
+                                    />
+                                    <InputError :message="form.errors.deputy_inspector" class="mt-2" />
+                                </div>
                             </div>
 
                             <!-- Two Column Layout for Supplier and Contract Type -->

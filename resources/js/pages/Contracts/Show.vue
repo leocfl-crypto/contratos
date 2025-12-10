@@ -14,7 +14,8 @@ import {
     Download,
     Trash2,
     File,
-    Paperclip
+    Paperclip,
+    Eye
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -235,6 +236,66 @@ const getFileIcon = (mimeType) => {
                                 </div>
                             </div>
 
+                            <!-- Manager -->
+                            <div class="rounded-lg border border-gray-200 p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100">
+                                        <User class="h-5 w-5 text-indigo-600" />
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-medium uppercase text-gray-500">Gestor</p>
+                                        <p class="text-sm font-semibold text-gray-900">
+                                            {{ contract.manager || 'N/A' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Deputy Manager -->
+                            <div class="rounded-lg border border-gray-200 p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                                        <User class="h-5 w-5 text-indigo-400" />
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-medium uppercase text-gray-500">Gestor Suplente</p>
+                                        <p class="text-sm font-semibold text-gray-900">
+                                            {{ contract.deputy_manager || 'N/A' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Inspector -->
+                            <div class="rounded-lg border border-gray-200 p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
+                                        <User class="h-5 w-5 text-amber-600" />
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-medium uppercase text-gray-500">Fiscal</p>
+                                        <p class="text-sm font-semibold text-gray-900">
+                                            {{ contract.inspector || 'N/A' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Deputy Inspector -->
+                            <div class="rounded-lg border border-gray-200 p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
+                                        <User class="h-5 w-5 text-amber-400" />
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-medium uppercase text-gray-500">Fiscal Suplente</p>
+                                        <p class="text-sm font-semibold text-gray-900">
+                                            {{ contract.deputy_inspector || 'N/A' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Created By -->
                             <div class="rounded-lg border border-gray-200 p-4">
                                 <div class="flex items-center gap-3">
@@ -332,6 +393,14 @@ const getFileIcon = (mimeType) => {
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 ml-4">
+                                    <a
+                                        :href="route('contract-files.preview', file.id)"
+                                        target="_blank"
+                                        class="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-green-600 transition"
+                                        title="Visualizar"
+                                    >
+                                        <Eye class="h-4 w-4" />
+                                    </a>
                                     <a
                                         :href="route('contract-files.download', file.id)"
                                         class="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-indigo-600 transition"
