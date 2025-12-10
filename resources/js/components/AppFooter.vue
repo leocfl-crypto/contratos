@@ -12,7 +12,7 @@ const currentYear = new Date().getFullYear();
                 <div class="brand-content">
                     <div class="brand-logo">
                         <Icon icon="mdi:file-document-multiple" class="logo-icon" />
-                        <h3 class="brand-title">Sistema de Contratos</h3>
+                        <h3 class="brand-title">Sistema de Documentos</h3>
                     </div>
                     <p class="brand-description">
                         Gerenciamento inteligente e eficiente de contratos para sua
@@ -95,7 +95,7 @@ const currentYear = new Date().getFullYear();
         <div class="footer-bottom">
             <div class="bottom-container">
                 <p class="copyright">
-                    © {{ currentYear }} Sistema de Contratos. Todos os direitos
+                    © {{ currentYear }} Sistema de Documentos. Todos os direitos
                     reservados.
                 </p>
                 <div class="bottom-links">

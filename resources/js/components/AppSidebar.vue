@@ -91,7 +91,7 @@ const mainNavItems: NavItem[] = [
                                         DocManager
                                     </span>
                                     <span class="text-xs text-muted-foreground tracking-wide">
-                                        Gestão de Contratos
+                                        Gestão de Documentos
                                     </span>
                                 </div>
                             </div>
