@@ -106,6 +106,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Internal Communications routes
+    Route::get('/comunicacoes-internas', [App\Http\Controllers\InternalCommunicationController::class, 'index'])->name('internal-communications.index');
+    Route::get('/comunicacoes-internas/nova', [App\Http\Controllers\InternalCommunicationController::class, 'create'])->name('internal-communications.create');
+    Route::post('/comunicacoes-internas', [App\Http\Controllers\InternalCommunicationController::class, 'store'])->name('internal-communications.store');
+    Route::get('/comunicacoes-internas/{id}', [App\Http\Controllers\InternalCommunicationController::class, 'show'])->name('internal-communications.show');
+    Route::get('/comunicacoes-internas/{id}/pdf', [App\Http\Controllers\InternalCommunicationController::class, 'exportPdf'])->name('internal-communications.pdf');
 });
 
 require __DIR__ . '/auth.php';

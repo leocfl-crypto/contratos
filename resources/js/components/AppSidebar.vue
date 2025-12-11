@@ -22,7 +22,9 @@ import {
     Lock,
     Palette,
     FileEdit,
-    Shield
+    Shield,
+    Mail,
+    MailPlus,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -33,11 +35,11 @@ const mainNavItems: NavItem[] = [
         icon: LayoutDashboard,
     },
     {
-        title: 'Contratos',
+        title: 'Documentos',
         icon: FileText,
         items: [
             {
-                title: 'Listar Contratos',
+                title: 'Listar Documentos',
                 href: '/contratos',
                 icon: FileText,
             },
@@ -45,6 +47,16 @@ const mainNavItems: NavItem[] = [
                 title: 'Novo Contrato',
                 href: '/contratos/novo',
                 icon: FilePlus,
+            },
+            {
+                title: 'Comunicação Interna',
+                href: '/comunicacoes-internas',
+                icon: Mail,
+            },
+            {
+                title: 'Nova Comunicação',
+                href: '/comunicacoes-internas/nova',
+                icon: MailPlus,
             },
         ],
     },
