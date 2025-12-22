@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comunicação Interna - {{ $communication->code }}</title>
     <style>
+        /* ========================================
+           RESET & BASE
+        ======================================== */
         * {
             margin: 0;
             padding: 0;
@@ -13,243 +16,216 @@
         }
 
         @page {
-            margin: 20mm 25mm;
+            margin: 15mm 20mm 20mm 20mm;
             background: #ffffff;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'DejaVu Sans', Arial, sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
-            color: #2c3e50;
+            font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #1a1a2e;
             background: #ffffff;
-            -webkit-font-smoothing: antialiased;
         }
 
         /* ========================================
-           HEADER - Cabeçalho Minimalista
+           HEADER - Cabeçalho Institucional
         ======================================== */
-        .header-wrapper {
-            border-bottom: 4px solid #0047AB;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
+        .header {
+            text-align: center;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1e3a5f;
         }
 
-        .header-container {
+        .header-logos {
             display: table;
             width: 100%;
+            margin-bottom: 8px;
         }
 
         .header-logo-left {
             display: table-cell;
-            width: 80px;
+            width: 70px;
             vertical-align: middle;
-            padding-right: 15px;
         }
 
         .header-logo-left img {
-            width: 65px;
+            width: 55px;
             height: auto;
         }
 
-        .header-text {
+        .header-center {
             display: table-cell;
             vertical-align: middle;
             text-align: center;
+            padding: 0 10px;
         }
 
         .header-logo-right {
             display: table-cell;
-            width: 100px;
+            width: 90px;
             vertical-align: middle;
-            padding-left: 15px;
             text-align: right;
         }
 
         .header-logo-right img {
-            width: 80px;
+            width: 75px;
             height: auto;
         }
 
         .header-title {
-            font-size: 14pt;
-            font-weight: 700;
-            color: #0047AB;
+            font-size: 15pt;
+            font-weight: bold;
+            color: #1e3a5f;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1.2;
+            letter-spacing: 1px;
             margin-bottom: 2px;
         }
 
         .header-subtitle {
             font-size: 9pt;
-            color: #657990;
+            color: #4a5568;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         /* ========================================
-           DOCUMENT TITLE - Título Principal
+           DOCUMENT BADGE - Identificação
         ======================================== */
-        .doc-title {
-            text-align: center;
-            margin: 35px 0 30px 0;
-            padding: 18px 0;
-            background: linear-gradient(135deg, #0047AB 0%, #0066CC 100%);
-            border-radius: 6px;
-        }
-
-        .doc-title-text {
-            font-size: 18pt;
-            font-weight: 800;
+        .doc-badge {
+            background: #1e3a5f;
             color: #ffffff;
+            text-align: center;
+            padding: 14px 20px;
+            margin: 20px 0;
+        }
+
+        .doc-badge-title {
+            font-size: 14pt;
+            font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
+            margin-bottom: 4px;
         }
 
-        /* ========================================
-           METADATA - Número e Data
-        ======================================== */
-        .metadata-container {
-            display: table;
-            width: 100%;
-            margin-bottom: 25px;
-        }
-
-        .metadata-left {
-            display: table-cell;
-            width: 50%;
-            vertical-align: middle;
-        }
-
-        .metadata-right {
-            display: table-cell;
-            width: 50%;
-            vertical-align: middle;
-            text-align: right;
-        }
-
-        .doc-number {
-            font-size: 13pt;
-            font-weight: 800;
-            color: #0047AB;
-            letter-spacing: 0.5px;
-        }
-
-        .doc-date {
-            font-size: 10pt;
-            color: #657990;
-            font-style: italic;
-        }
-
-        /* ========================================
-           INFO GRID - Para/De Compacto
-        ======================================== */
-        .info-grid {
-            display: table;
-            width: 100%;
-            margin: 25px 0;
-            border: 2px solid #e8ecf1;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .info-row {
-            display: table-row;
-        }
-
-        .info-label {
-            display: table-cell;
-            width: 70px;
-            padding: 12px 15px;
-            background: #f8f9fb;
-            border-right: 2px solid #e8ecf1;
-            border-bottom: 1px solid #e8ecf1;
-            font-weight: 700;
-            font-size: 9.5pt;
-            color: #0047AB;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            vertical-align: middle;
-        }
-
-        .info-row:last-child .info-label,
-        .info-row:last-child .info-value {
-            border-bottom: none;
-        }
-
-        .info-value {
-            display: table-cell;
-            padding: 12px 15px;
-            border-bottom: 1px solid #e8ecf1;
-            vertical-align: middle;
-        }
-
-        .info-name {
+        .doc-badge-number {
             font-size: 11pt;
-            font-weight: 700;
-            color: #2c3e50;
-            display: block;
-            margin-bottom: 3px;
+            letter-spacing: 1px;
+            opacity: 0.9;
         }
 
-        .info-role {
-            font-size: 9.5pt;
-            color: #8896a8;
+        /* ========================================
+           META INFO - Data e Local
+        ======================================== */
+        .meta-info {
+            text-align: right;
+            margin-bottom: 20px;
+            padding: 8px 0;
+        }
+
+        .meta-date {
+            font-size: 10pt;
+            color: #4a5568;
             font-style: italic;
         }
 
         /* ========================================
-           SUBJECT - Assunto Destacado
+           INFO CARDS - Para/De
+        ======================================== */
+        .info-cards {
+            display: table;
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: separate;
+            border-spacing: 10px 0;
+        }
+
+        .info-card {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+            background: #f7f9fc;
+            border: 1px solid #e2e8f0;
+            padding: 0;
+        }
+
+        .info-card-header {
+            background: #1e3a5f;
+            color: #ffffff;
+            padding: 8px 12px;
+            font-size: 9pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-card-body {
+            padding: 12px;
+        }
+
+        .info-card-name {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .info-card-role {
+            font-size: 9pt;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* ========================================
+           SUBJECT BOX - Assunto
         ======================================== */
         .subject-box {
-            background: #f0f7ff;
-            border-left: 5px solid #0047AB;
-            padding: 15px 20px;
-            margin: 25px 0;
-            border-radius: 0 6px 6px 0;
+            background: #eef2f7;
+            border-left: 4px solid #1e3a5f;
+            padding: 14px 18px;
+            margin: 20px 0;
         }
 
         .subject-label {
-            font-size: 9pt;
-            font-weight: 700;
-            color: #0047AB;
+            font-size: 8pt;
+            font-weight: bold;
+            color: #1e3a5f;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .subject-text {
-            font-size: 11.5pt;
-            font-weight: 600;
-            color: #2c3e50;
-            line-height: 1.5;
+            font-size: 11pt;
+            font-weight: bold;
+            color: #1a1a2e;
+            line-height: 1.4;
         }
 
         /* ========================================
-           CONTENT - Conteúdo
+           CONTENT - Corpo do Documento
         ======================================== */
-        .content-area {
-            margin: 30px 0;
-            line-height: 1.8;
+        .content {
+            margin: 25px 0;
+            line-height: 1.7;
         }
 
         .content-greeting {
-            margin-bottom: 20px;
-            font-size: 11pt;
-            color: #2c3e50;
+            font-size: 10pt;
+            color: #1a1a2e;
+            margin-bottom: 18px;
         }
 
         .content-body {
             text-align: justify;
-            color: #404e5c;
-            line-height: 1.85;
+            color: #2d3748;
+            font-size: 10pt;
         }
 
         .content-body p {
-            margin-bottom: 15px;
-            text-indent: 40px;
+            margin-bottom: 14px;
+            text-indent: 35px;
         }
 
         /* ========================================
@@ -261,33 +237,34 @@
         }
 
         .signature-closing {
-            margin-bottom: 50px;
-            color: #2c3e50;
+            margin-bottom: 45px;
+            color: #1a1a2e;
+            font-size: 10pt;
         }
 
         .signature-block {
             text-align: center;
-            margin-top: 60px;
+            max-width: 280px;
+            margin: 0 auto;
         }
 
         .signature-line {
-            width: 280px;
-            border-top: 2px solid #2c3e50;
-            margin: 0 auto 10px auto;
+            border-top: 1px solid #1a1a2e;
+            margin-bottom: 8px;
         }
 
         .signature-name {
-            font-size: 11pt;
-            font-weight: 700;
+            font-size: 10pt;
+            font-weight: bold;
             text-transform: uppercase;
-            color: #0047AB;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
+            color: #1e3a5f;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
         }
 
         .signature-role {
-            font-size: 9.5pt;
-            color: #657990;
+            font-size: 9pt;
+            color: #64748b;
             font-style: italic;
         }
 
@@ -296,25 +273,23 @@
         ======================================== */
         .footer {
             position: fixed;
-            bottom: 15mm;
+            bottom: 0;
             left: 0;
             right: 0;
             text-align: center;
             padding-top: 10px;
-            border-top: 1px solid #e8ecf1;
+            border-top: 1px solid #e2e8f0;
         }
 
         .footer-text {
-            font-size: 8pt;
-            color: #8896a8;
-            line-height: 1.4;
+            font-size: 7.5pt;
+            color: #64748b;
         }
 
-        .footer-watermark {
-            font-size: 7.5pt;
-            color: #b0bac7;
-            margin-top: 3px;
-            font-style: italic;
+        .footer-gen {
+            font-size: 7pt;
+            color: #94a3b8;
+            margin-top: 2px;
         }
 
         /* ========================================
@@ -323,19 +298,25 @@
         .no-break {
             page-break-inside: avoid;
         }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid #e2e8f0;
+            margin: 15px 0;
+        }
     </style>
 </head>
 
 <body>
     <!-- HEADER -->
-    <div class="header-wrapper">
-        <div class="header-container">
+    <div class="header">
+        <div class="header-logos">
             <div class="header-logo-left">
                 @if(file_exists(public_path('images/brasao-lagoa-santa.png')))
                     <img src="{{ public_path('images/brasao-lagoa-santa.png') }}" alt="Brasão">
                 @endif
             </div>
-            <div class="header-text">
+            <div class="header-center">
                 <div class="header-title">Prefeitura Municipal de Lagoa Santa</div>
                 <div class="header-subtitle">Estado de Minas Gerais</div>
             </div>
@@ -347,52 +328,49 @@
         </div>
     </div>
 
-    <!-- DOCUMENT TITLE -->
-    <div class="doc-title">
-        <div class="doc-title-text">Comunicação Interna</div>
-    </div>
-
-    <!-- METADATA -->
-    <div class="metadata-container">
-        <div class="metadata-left">
-            <div class="doc-number">Nº {{ $communication->code }}@if($communication->department) /
-            {{ $communication->department }}@endif</div>
-        </div>
-        <div class="metadata-right">
-            <div class="doc-date">Lagoa Santa/MG, {{ $communication->formatted_date }}</div>
+    <!-- DOCUMENT BADGE -->
+    <div class="doc-badge">
+        <div class="doc-badge-title">Comunicação Interna</div>
+        <div class="doc-badge-number">
+            Nº {{ $communication->code }}@if($communication->department) / {{ $communication->department }}@endif
         </div>
     </div>
 
-    <!-- INFO GRID -->
-    <div class="info-grid">
-        <div class="info-row">
-            <div class="info-label">PARA:</div>
-            <div class="info-value">
-                <span class="info-name">{{ $communication->recipient_name }}</span>
+    <!-- META INFO -->
+    <div class="meta-info">
+        <div class="meta-date">Lagoa Santa/MG, {{ $communication->formatted_date }}</div>
+    </div>
+
+    <!-- INFO CARDS -->
+    <div class="info-cards">
+        <div class="info-card">
+            <div class="info-card-header">Para</div>
+            <div class="info-card-body">
+                <div class="info-card-name">{{ $communication->recipient_name }}</div>
                 @if($communication->recipient_role)
-                    <span class="info-role">{{ $communication->recipient_role }}</span>
+                    <div class="info-card-role">{{ $communication->recipient_role }}</div>
                 @endif
             </div>
         </div>
-        <div class="info-row">
-            <div class="info-label">DE:</div>
-            <div class="info-value">
-                <span class="info-name">{{ $communication->sender_name }}</span>
+        <div class="info-card">
+            <div class="info-card-header">De</div>
+            <div class="info-card-body">
+                <div class="info-card-name">{{ $communication->sender_name }}</div>
                 @if($communication->sender_role)
-                    <span class="info-role">{{ $communication->sender_role }}</span>
+                    <div class="info-card-role">{{ $communication->sender_role }}</div>
                 @endif
             </div>
         </div>
     </div>
 
-    <!-- SUBJECT -->
+    <!-- SUBJECT BOX -->
     <div class="subject-box">
-        <div class="subject-label">Assunto:</div>
+        <div class="subject-label">Assunto</div>
         <div class="subject-text">{{ $communication->subject }}</div>
     </div>
 
     <!-- CONTENT -->
-    <div class="content-area">
+    <div class="content">
         <div class="content-greeting">Prezado(a) Senhor(a),</div>
         <div class="content-body">
             {!! $communication->formatted_content !!}
@@ -413,8 +391,8 @@
 
     <!-- FOOTER -->
     <div class="footer">
-        <div class="footer-text">Prefeitura Municipal de Lagoa Santa - Estado de Minas Gerais</div>
-        <div class="footer-watermark">Documento gerado eletronicamente</div>
+        <div class="footer-text">Prefeitura Municipal de Lagoa Santa — Estado de Minas Gerais</div>
+        <div class="footer-gen">Documento gerado eletronicamente em {{ now()->format('d/m/Y H:i') }}</div>
     </div>
 
 </body>
