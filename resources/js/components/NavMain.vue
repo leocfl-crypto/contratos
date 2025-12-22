@@ -44,10 +44,10 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
                         :tooltip="item.title"
                         class="nav-item"
                     >
-                        <component :is="item.icon" class="nav-icon" />
-                        <span class="nav-text">{{ item.title }}</span>
+                        <component :is="item.icon" class="nav-icon dark:text-gray-200" />
+                        <span class="nav-text dark:text-gray-200">{{ item.title }}</span>
                         <ChevronRight 
-                            class="nav-chevron"
+                            class="nav-chevron dark:text-gray-400"
                             :class="isExpanded(item.title) ? 'rotate-90' : ''"
                         />
                     </SidebarMenuButton>
@@ -67,8 +67,8 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
                                     class="nav-subitem"
                                 >
                                     <Link :href="subItem.href!">
-                                        <component :is="subItem.icon" class="nav-subicon" />
-                                        <span>{{ subItem.title }}</span>
+                                        <component :is="subItem.icon" class="nav-subicon dark:text-gray-300" />
+                                        <span class="dark:text-gray-200">{{ subItem.title }}</span>
                                     </Link>
                                 </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -85,8 +85,8 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
                         class="nav-item"
                     >
                         <Link :href="item.href!">
-                            <component :is="item.icon" class="nav-icon" />
-                            <span class="nav-text">{{ item.title }}</span>
+                            <component :is="item.icon" class="nav-icon dark:text-gray-200" />
+                            <span class="nav-text dark:text-gray-200">{{ item.title }}</span>
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -109,14 +109,28 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
     cursor: pointer;
 }
 
+:global(.dark) .nav-item {
+    color: hsl(220 13% 69%);
+}
+
 .nav-item:hover {
     background: hsl(220 14% 96%);
     color: hsl(220 9% 20%);
 }
 
+:global(.dark) .nav-item:hover {
+    background: hsl(217 33% 17%);
+    color: hsl(0 0% 100%);
+}
+
 .nav-item[data-active="true"] {
     background: linear-gradient(135deg, hsl(262 83% 58% / 0.1) 0%, hsl(262 83% 58% / 0.05) 100%);
     color: hsl(262 83% 58%);
+}
+
+:global(.dark) .nav-item[data-active="true"] {
+    background: linear-gradient(135deg, hsl(262 83% 58% / 0.2) 0%, hsl(262 83% 58% / 0.1) 100%);
+    color: hsl(262 83% 70%);
 }
 
 .nav-icon {
@@ -143,6 +157,10 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
     border-left: 1px solid hsl(220 13% 91%);
 }
 
+:global(.dark) .nav-submenu {
+    border-left: 1px solid hsl(217 33% 25%);
+}
+
 .nav-subitem {
     display: flex;
     align-items: center;
@@ -155,15 +173,29 @@ const isExpanded = (title: string) => expandedItems.value.has(title);
     transition: all 0.15s ease;
 }
 
+:global(.dark) .nav-subitem {
+    color: hsl(220 13% 69%);
+}
+
 .nav-subitem:hover {
     background: hsl(220 14% 96%);
     color: hsl(220 9% 20%);
+}
+
+:global(.dark) .nav-subitem:hover {
+    background: hsl(217 33% 17%);
+    color: hsl(0 0% 100%);
 }
 
 .nav-subitem[data-active="true"] {
     background: hsl(262 83% 58% / 0.08);
     color: hsl(262 83% 58%);
     font-weight: 500;
+}
+
+:global(.dark) .nav-subitem[data-active="true"] {
+    background: hsl(262 83% 58% / 0.15);
+    color: hsl(262 83% 70%);
 }
 
 .nav-subicon {

@@ -115,6 +115,11 @@ const mainNavItems: NavItem[] = [
     border-right: 1px solid hsl(220 13% 91%);
 }
 
+:global(.dark) .sidebar-modern {
+    background: hsl(222 47% 11%);
+    border-right: 1px solid hsl(217 33% 17%);
+}
+
 .sidebar-header {
     padding: 1.25rem 1rem;
     border-bottom: none;
@@ -129,6 +134,10 @@ const mainNavItems: NavItem[] = [
 
 .sidebar-brand:hover {
     background: hsl(220 14% 96%);
+}
+
+:global(.dark) .sidebar-brand:hover {
+    background: hsl(217 33% 17%);
 }
 
 .sidebar-content {
@@ -150,12 +159,24 @@ const mainNavItems: NavItem[] = [
     border-radius: 2px;
 }
 
+:global(.dark) .sidebar-content::-webkit-scrollbar-thumb {
+    background: hsl(217 33% 30%);
+}
+
 .sidebar-content::-webkit-scrollbar-thumb:hover {
     background: hsl(220 13% 75%);
+}
+
+:global(.dark) .sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: hsl(217 33% 40%);
 }
 
 .sidebar-footer {
     padding: 1rem;
     border-top: 1px solid hsl(220 13% 91%);
+}
+
+:global(.dark) .sidebar-footer {
+    border-top: 1px solid hsl(217 33% 17%);
 }
 </style>

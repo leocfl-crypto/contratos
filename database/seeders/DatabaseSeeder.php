@@ -18,5 +18,11 @@ class DatabaseSeeder extends Seeder
             'name' => 'Leonardo Leite',
             'email' => 'leocfl@gmail.com',
         ]);
+
+        // Create Camila Abreu user
+        User::factory()->create([
+            'name' => 'Camila Abreu',
+            'email' => 'camilaabreu@lagoasanta.mg.gov.br',
+        ]);
     }
 }

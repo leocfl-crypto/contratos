@@ -5,6 +5,7 @@ import { FileText, Clock, CheckCircle2, AlertCircle, TrendingUp, BarChart3, Eye 
 import ContractStatusChart from '@/components/charts/ContractStatusChart.vue';
 import ContractTimelineChart from '@/components/charts/ContractTimelineChart.vue';
 import ContractTypeChart from '@/components/charts/ContractTypeChart.vue';
+import { useDashboardLayout } from '@/composables/useDashboardLayout';
 
 const props = defineProps({
     stats: Object,
@@ -15,6 +16,13 @@ const props = defineProps({
     typeLabels: Array,
     typeData: Array,
 });
+
+const { sections, isSectionVisible } = useDashboardLayout();
+
+const getOrder = (id) => {
+    const section = sections.value.find(s => s.id === id);
+    return section ? section.order : 0;
+};
 
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -29,13 +37,13 @@ const formatDate = (date) => {
 
 const getStatusClass = (status) => {
     const classes = {
-        'Ativo': 'bg-green-100 text-green-800',
-        'Pendente': 'bg-yellow-100 text-yellow-800',
-        'Em Análise': 'bg-blue-100 text-blue-800',
-        'Suspenso': 'bg-orange-100 text-orange-800',
-        'Encerrado': 'bg-gray-100 text-gray-800',
+        'Ativo': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+        'Pendente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+        'Em Análise': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+        'Suspenso': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+        'Encerrado': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     };
-    return classes[status] || 'bg-gray-100 text-gray-800';
+    return classes[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
 };
 </script>
 
@@ -50,9 +58,13 @@ const getStatusClass = (status) => {
         </template>
 
         <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 flex flex-col gap-8">
                 <!-- Stats Cards -->
-                <div class="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div 
+                    v-if="isSectionVisible('stats')"
+                    :style="{ order: getOrder('stats') }"
+                    class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+                >
                     <!-- Card 1: Contratos Ativos -->
                     <div class="group animate-slide-up rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 p-6 text-white shadow-premium transition-all duration-300 hover:-translate-y-2 hover:shadow-premium-lg">
                         <div class="flex items-center justify-between">
@@ -120,71 +132,79 @@ const getStatusClass = (status) => {
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="mb-8 grid gap-6 lg:grid-cols-3">
-                    <div class="animate-slide-up overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-xl" style="animation-delay: 0.4s;">
-                        <div class="border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50 px-6 py-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Ações Rápidas</h3>
-                        </div>
-                        <div class="p-6">
-                            <div class="space-y-3">
-                                <Link :href="route('contracts.create')" class="block w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-4 py-3 text-left text-sm font-medium text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-                                    <div class="flex items-center gap-3">
-                                        <FileText :size="20" />
-                                        <span>Novo Contrato</span>
-                                    </div>
-                                </Link>
-                                <Link :href="route('contracts.index')" class="block w-full rounded-lg border-2 border-primary-200 bg-white px-4 py-3 text-left text-sm font-medium text-primary-700 transition-all duration-200 hover:border-primary-300 hover:bg-primary-50">
-                                    <div class="flex items-center gap-3">
-                                        <Clock :size="20" />
-                                        <span>Revisar Pendentes</span>
-                                    </div>
-                                </Link>
-                                <Link :href="route('contracts.index')" class="block w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-left text-sm font-medium text-gray-700 transition-all duration-200 hover:border-gray-300 hover:bg-gray-50">
-                                    <div class="flex items-center gap-3">
-                                        <AlertCircle :size="20" />
-                                        <span>Ver Todos</span>
-                                    </div>
-                                </Link>
-                            </div>
-                        </div>
+                <div 
+                    v-if="isSectionVisible('quickActions')"
+                    :style="{ order: getOrder('quickActions') }"
+                    class="animate-slide-up overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-900/5 dark:ring-gray-700 transition-all duration-300 hover:shadow-xl" 
+                    style="animation-delay: 0.4s;"
+                >
+                    <div class="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-gray-800 dark:to-gray-800 px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ações Rápidas</h3>
                     </div>
-
-                    <!-- Recent Activity -->
-                    <div class="animate-slide-up overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-xl lg:col-span-2" style="animation-delay: 0.5s;">
-                        <div class="border-b border-gray-200 bg-gradient-to-r from-secondary-50 to-primary-50 px-6 py-4 flex items-center justify-between">
-                            <h3 class="text-lg font-semibold text-gray-900">Contratos Recentes</h3>
-                            <Link :href="route('contracts.index')" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                                Ver todos
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <Link :href="route('contracts.create')" class="block w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-4 py-3 text-left text-sm font-medium text-white shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+                                <div class="flex items-center gap-3">
+                                    <FileText :size="20" />
+                                    <span>Novo Contrato</span>
+                                </div>
+                            </Link>
+                            <Link :href="route('contracts.index')" class="block w-full rounded-lg border-2 border-primary-200 dark:border-primary-700 bg-white dark:bg-gray-700 px-4 py-3 text-left text-sm font-medium text-primary-700 dark:text-primary-300 transition-all duration-200 hover:border-primary-300 hover:bg-primary-50 dark:hover:bg-gray-600">
+                                <div class="flex items-center gap-3">
+                                    <Clock :size="20" />
+                                    <span>Revisar Pendentes</span>
+                                </div>
+                            </Link>
+                            <Link :href="route('contracts.index')" class="block w-full rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-200 transition-all duration-200 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <div class="flex items-center gap-3">
+                                    <AlertCircle :size="20" />
+                                    <span>Ver Todos</span>
+                                </div>
                             </Link>
                         </div>
-                        <div v-if="!recentContracts || recentContracts.length === 0" class="p-12 text-center">
-                            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                                <FileText :size="32" class="text-gray-400" />
-                            </div>
-                            <h3 class="mb-2 text-lg font-semibold text-gray-900">Nenhum contrato cadastrado</h3>
-                            <p class="text-sm text-gray-600">Comece cadastrando seu primeiro contrato usando o botão "Novo Contrato" acima.</p>
+                    </div>
+                </div>
+
+                <!-- Recent Contracts -->
+                <div 
+                    v-if="isSectionVisible('recentContracts')"
+                    :style="{ order: getOrder('recentContracts') }"
+                    class="animate-slide-up overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-900/5 dark:ring-gray-700 transition-all duration-300 hover:shadow-xl" 
+                    style="animation-delay: 0.5s;"
+                >
+                    <div class="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-secondary-50 to-primary-50 dark:from-gray-800 dark:to-gray-800 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Contratos Recentes</h3>
+                        <Link :href="route('contracts.index')" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
+                            Ver todos
+                        </Link>
+                    </div>
+                    <div v-if="!recentContracts || recentContracts.length === 0" class="p-12 text-center">
+                        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                            <FileText :size="32" class="text-gray-400" />
                         </div>
-                        <div v-else class="divide-y divide-gray-100">
-                            <div v-for="contract in recentContracts" :key="contract.id" class="p-4 hover:bg-gray-50 transition-colors">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-4">
-                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100">
-                                            <FileText class="h-5 w-5 text-indigo-600" />
-                                        </div>
-                                        <div>
-                                            <p class="font-mono text-sm font-medium text-gray-900">{{ contract.code }}</p>
-                                            <p class="text-sm text-gray-500 truncate max-w-xs">{{ contract.title }}</p>
-                                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Nenhum contrato cadastrado</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Comece cadastrando seu primeiro contrato usando o botão "Novo Contrato" acima.</p>
+                    </div>
+                    <div v-else class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <div v-for="contract in recentContracts" :key="contract.id" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                                        <FileText class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                                     </div>
-                                    <div class="flex items-center gap-4">
-                                        <span :class="getStatusClass(contract.status)" class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium">
-                                            {{ contract.status }}
-                                        </span>
-                                        <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(contract.total) }}</span>
-                                        <Link :href="route('contracts.show', contract.id)" class="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-indigo-600 transition">
-                                            <Eye class="h-4 w-4" />
-                                        </Link>
+                                    <div>
+                                        <p class="font-mono text-sm font-medium text-gray-900 dark:text-white">{{ contract.code }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ contract.title }}</p>
                                     </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span :class="getStatusClass(contract.status)" class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium">
+                                        {{ contract.status }}
+                                    </span>
+                                    <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ formatCurrency(contract.total) }}</span>
+                                    <Link :href="route('contracts.show', contract.id)" class="rounded p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                        <Eye class="h-4 w-4" />
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -192,73 +212,76 @@ const getStatusClass = (status) => {
                 </div>
 
                 <!-- Charts Section -->
-                <div class="mb-8">
+                <div 
+                    v-if="isSectionVisible('charts')"
+                    :style="{ order: getOrder('charts') }"
+                >
                     <div class="mb-6 flex items-center gap-3">
                         <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/30">
                             <BarChart3 :size="24" class="text-white" />
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-900">Análise de Dados</h2>
-                            <p class="text-sm text-gray-600">Visualize métricas e tendências dos seus contratos</p>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Análise de Dados</h2>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Visualize métricas e tendências dos seus contratos</p>
                         </div>
                     </div>
 
                     <div class="grid gap-6 lg:grid-cols-3">
                         <!-- Status Distribution Chart -->
-                        <div class="animate-slide-up overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-xl" style="animation-delay: 0.1s;">
-                            <div class="border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
+                        <div class="animate-slide-up overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-900/5 dark:ring-gray-700 transition-all duration-300 hover:shadow-xl" style="animation-delay: 0.1s;">
+                            <div class="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
-                                        <FileText :size="16" class="text-blue-600" />
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                                        <FileText :size="16" class="text-blue-600 dark:text-blue-400" />
                                     </div>
-                                    <h3 class="text-base font-semibold text-gray-900">Distribuição por Status</h3>
+                                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Distribuição por Status</h3>
                                 </div>
                             </div>
                             <div class="p-6">
                                 <div class="h-64">
                                     <ContractStatusChart :data="statusData" />
                                 </div>
-                                <p class="mt-4 text-center text-sm text-gray-500">
+                                <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
                                     {{ stats?.total > 0 ? 'Total: ' + stats.total + ' contratos' : 'Nenhum dado disponível' }}
                                 </p>
                             </div>
                         </div>
 
                         <!-- Timeline Chart -->
-                        <div class="animate-slide-up overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-xl" style="animation-delay: 0.2s;">
-                            <div class="border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+                        <div class="animate-slide-up overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-900/5 dark:ring-gray-700 transition-all duration-300 hover:shadow-xl" style="animation-delay: 0.2s;">
+                            <div class="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-800 px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100">
-                                        <TrendingUp :size="16" class="text-purple-600" />
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                                        <TrendingUp :size="16" class="text-purple-600 dark:text-purple-400" />
                                     </div>
-                                    <h3 class="text-base font-semibold text-gray-900">Evolução Temporal</h3>
+                                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Evolução Temporal</h3>
                                 </div>
                             </div>
                             <div class="p-6">
                                 <div class="h-64">
                                     <ContractTimelineChart :labels="timelineLabels" :data="timelineData" />
                                 </div>
-                                <p class="mt-4 text-center text-sm text-gray-500">
+                                <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
                                     Últimos 6 meses
                                 </p>
                             </div>
                         </div>
 
                         <!-- Type Distribution Chart -->
-                        <div class="animate-slide-up overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all duration-300 hover:shadow-xl" style="animation-delay: 0.3s;">
-                            <div class="border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4">
+                        <div class="animate-slide-up overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg ring-1 ring-gray-900/5 dark:ring-gray-700 transition-all duration-300 hover:shadow-xl" style="animation-delay: 0.3s;">
+                            <div class="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-gray-800 dark:to-gray-800 px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
-                                        <BarChart3 :size="16" class="text-emerald-600" />
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                                        <BarChart3 :size="16" class="text-emerald-600 dark:text-emerald-400" />
                                     </div>
-                                    <h3 class="text-base font-semibold text-gray-900">Por Tipo de Contrato</h3>
+                                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">Por Tipo de Contrato</h3>
                                 </div>
                             </div>
                             <div class="p-6">
                                 <div class="h-64">
                                     <ContractTypeChart :labels="typeLabels" :data="typeData" />
                                 </div>
-                                <p class="mt-4 text-center text-sm text-gray-500">
+                                <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
                                     Distribuição por categoria
                                 </p>
                             </div>

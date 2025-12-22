@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { useAppearance } from '@/composables/useAppearance';
-import { Monitor, Moon, Sun } from 'lucide-vue-next';
+import { useFontSize } from '@/composables/useFontSize';
+import { Type } from 'lucide-vue-next';
 
-const { appearance, updateAppearance } = useAppearance();
+const { fontSize, changeFontSize } = useFontSize();
 
-const tabs = [
-    { value: 'light', Icon: Sun, label: 'Claro' },
-    { value: 'dark', Icon: Moon, label: 'Escuro' },
-    { value: 'system', Icon: Monitor, label: 'Sistema' },
+const sizes = [
+    { value: 'small', label: 'Pequeno', size: 'text-xs' },
+    { value: 'medium', label: 'Médio', size: 'text-sm' },
+    { value: 'large', label: 'Grande', size: 'text-base' },
 ] as const;
 </script>
 
@@ -16,18 +16,18 @@ const tabs = [
         class="inline-flex gap-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 p-1"
     >
         <button
-            v-for="{ value, Icon, label } in tabs"
+            v-for="{ value, label, size } in sizes"
             :key="value"
-            @click="updateAppearance(value)"
+            @click="changeFontSize(value)"
             :class="[
                 'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
-                appearance === value
+                fontSize === value
                     ? 'bg-white dark:bg-neutral-700 shadow-xs dark:text-white'
                     : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60 hover:text-black dark:hover:text-white',
             ]"
         >
-            <component :is="Icon" class="-ml-1 h-4 w-4" />
-            <span class="ml-1.5 text-sm">{{ label }}</span>
+            <Type class="-ml-1 h-4 w-4" />
+            <span :class="['ml-1.5', size]">{{ label }}</span>
         </button>
     </div>
 </template>

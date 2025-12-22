@@ -5,6 +5,8 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
+import { initializeFontSize } from './composables/useFontSize';
+import { initializeDashboardLayout } from './composables/useDashboardLayout';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -29,3 +31,10 @@ createInertiaApp({
 
 // This will set light / dark mode on page load...
 initializeTheme();
+
+// This will set font size on page load...
+initializeFontSize();
+
+// This will set dashboard layout on page load...
+initializeDashboardLayout();
+
