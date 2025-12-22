@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comunicação Interna - {{ $communication->code }}</title>
+    <title>Ofício - {{ $oficio->code }}</title>
     <style>
         /* ========================================
            RESET & BASE
@@ -35,7 +35,7 @@
             text-align: center;
             padding-bottom: 12px;
             margin-bottom: 20px;
-            border-bottom: 3px solid #1e3a5f;
+            border-bottom: 3px solid #4338ca;
         }
 
         .header-logo {
@@ -47,7 +47,7 @@
         .header-title {
             font-size: 15pt;
             font-weight: bold;
-            color: #1e3a5f;
+            color: #4338ca;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 2px;
@@ -64,7 +64,7 @@
            DOCUMENT BADGE - Identificação
         ======================================== */
         .doc-badge {
-            background: #1e3a5f;
+            background: #4338ca;
             color: #ffffff;
             text-align: center;
             padding: 14px 20px;
@@ -101,50 +101,42 @@
         }
 
         /* ========================================
-           INFO CARDS - Para/De
+           RECIPIENT BOX - Destinatário
         ======================================== */
-        .info-cards {
-            display: table;
-            width: 100%;
+        .recipient-box {
+            background: #f5f3ff;
+            border-left: 4px solid #4338ca;
+            padding: 14px 18px;
             margin: 20px 0;
-            border-collapse: separate;
-            border-spacing: 10px 0;
         }
 
-        .info-card {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-            background: #f7f9fc;
-            border: 1px solid #e2e8f0;
-            padding: 0;
-        }
-
-        .info-card-header {
-            background: #1e3a5f;
-            color: #ffffff;
-            padding: 8px 12px;
-            font-size: 9pt;
+        .recipient-label {
+            font-size: 8pt;
             font-weight: bold;
+            color: #4338ca;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
-        .info-card-body {
-            padding: 12px;
-        }
-
-        .info-card-name {
+        .recipient-name {
             font-size: 11pt;
             font-weight: bold;
             color: #1a1a2e;
-            margin-bottom: 4px;
         }
 
-        .info-card-role {
+        .recipient-role {
             font-size: 9pt;
             color: #64748b;
             font-style: italic;
+            margin-top: 2px;
+        }
+
+        .recipient-institution {
+            font-size: 9pt;
+            color: #4338ca;
+            font-weight: bold;
+            margin-top: 4px;
         }
 
         /* ========================================
@@ -152,6 +144,7 @@
         ======================================== */
         .subject-box {
             background: #eef2f7;
+            border-left: 4px solid #4338ca;
             padding: 14px 18px;
             margin: 20px 0;
         }
@@ -159,7 +152,7 @@
         .subject-label {
             font-size: 8pt;
             font-weight: bold;
-            color: #1e3a5f;
+            color: #4338ca;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 6px;
@@ -226,7 +219,7 @@
             font-size: 10pt;
             font-weight: bold;
             text-transform: uppercase;
-            color: #1e3a5f;
+            color: #4338ca;
             letter-spacing: 0.5px;
             margin-bottom: 3px;
         }
@@ -267,12 +260,6 @@
         .no-break {
             page-break-inside: avoid;
         }
-
-        .divider {
-            border: 0;
-            border-top: 1px solid #e2e8f0;
-            margin: 15px 0;
-        }
     </style>
 </head>
 
@@ -297,50 +284,40 @@
 
     <!-- DOCUMENT BADGE -->
     <div class="doc-badge">
-        <div class="doc-badge-title">Comunicação Interna</div>
+        <div class="doc-badge-title">Ofício</div>
         <div class="doc-badge-number">
-            Nº {{ $communication->code }}@if($communication->department)/{{ $communication->department }}@endif
+            Nº {{ $oficio->code }}@if($oficio->department) / {{ $oficio->department }}@endif
         </div>
     </div>
 
     <!-- META INFO -->
     <div class="meta-info">
-        <div class="meta-date">Lagoa Santa/MG, {{ $communication->formatted_date }}</div>
+        <div class="meta-date">Lagoa Santa/MG, {{ $oficio->formatted_date }}</div>
     </div>
 
-    <!-- INFO CARDS -->
-    <div class="info-cards">
-        <div class="info-card">
-            <div class="info-card-header">De</div>
-            <div class="info-card-body">
-                <div class="info-card-name">{{ $communication->sender_name }}</div>
-                @if($communication->sender_role)
-                    <div class="info-card-role">{{ $communication->sender_role }}</div>
-                @endif
-            </div>
-        </div>
-        <div class="info-card">
-            <div class="info-card-header">Para</div>
-            <div class="info-card-body">
-                <div class="info-card-name">{{ $communication->recipient_name }}</div>
-                @if($communication->recipient_role)
-                    <div class="info-card-role">{{ $communication->recipient_role }}</div>
-                @endif
-            </div>
-        </div>
+    <!-- RECIPIENT BOX -->
+    <div class="recipient-box">
+        <div class="recipient-label">Destinatário</div>
+        <div class="recipient-name">{{ $oficio->recipient_name }}</div>
+        @if($oficio->recipient_role)
+            <div class="recipient-role">{{ $oficio->recipient_role }}</div>
+        @endif
+        @if($oficio->recipient_institution)
+            <div class="recipient-institution">{{ $oficio->recipient_institution }}</div>
+        @endif
     </div>
 
     <!-- SUBJECT BOX -->
     <div class="subject-box">
         <div class="subject-label">Assunto</div>
-        <div class="subject-text">{{ $communication->subject }}</div>
+        <div class="subject-text">{{ $oficio->subject }}</div>
     </div>
 
     <!-- CONTENT -->
     <div class="content">
         <div class="content-greeting">Prezado(a) Senhor(a),</div>
         <div class="content-body">
-            {!! $communication->formatted_content !!}
+            {!! $oficio->formatted_content !!}
         </div>
     </div>
 
@@ -349,9 +326,9 @@
         <div class="signature-closing">Atenciosamente,</div>
         <div class="signature-block">
             <div class="signature-line"></div>
-            <div class="signature-name">{{ strtoupper($communication->sender_name) }}</div>
-            @if($communication->sender_role)
-                <div class="signature-role">{{ $communication->sender_role }}</div>
+            <div class="signature-name">{{ strtoupper($oficio->sender_name) }}</div>
+            @if($oficio->sender_role)
+                <div class="signature-role">{{ $oficio->sender_role }}</div>
             @endif
         </div>
     </div>

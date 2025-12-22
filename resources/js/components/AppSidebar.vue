@@ -25,6 +25,7 @@ import {
     Shield,
     Mail,
     MailPlus,
+    FileStack,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -57,6 +58,16 @@ const mainNavItems: NavItem[] = [
                 title: 'Nova Comunicação',
                 href: '/comunicacoes-internas/nova',
                 icon: MailPlus,
+            },
+            {
+                title: 'Ofícios',
+                href: '/oficios',
+                icon: FileStack,
+            },
+            {
+                title: 'Novo Ofício',
+                href: '/oficios/novo',
+                icon: FileStack,
             },
         ],
     },

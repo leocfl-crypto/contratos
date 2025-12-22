@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comunicação Interna - {{ $communication->code }}</title>
+    <title>Ofício - <?php echo e($oficio->code); ?></title>
     <style>
         /* ========================================
            RESET & BASE
@@ -35,19 +35,49 @@
             text-align: center;
             padding-bottom: 12px;
             margin-bottom: 20px;
-            border-bottom: 3px solid #1e3a5f;
+            border-bottom: 3px solid #4338ca;
         }
 
-        .header-logo {
-            max-width: 180px;
+        .header-logos {
+            display: table;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .header-logo-left {
+            display: table-cell;
+            width: 70px;
+            vertical-align: middle;
+        }
+
+        .header-logo-left img {
+            width: 55px;
             height: auto;
-            margin-bottom: 10px;
+        }
+
+        .header-center {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .header-logo-right {
+            display: table-cell;
+            width: 90px;
+            vertical-align: middle;
+            text-align: right;
+        }
+
+        .header-logo-right img {
+            width: 75px;
+            height: auto;
         }
 
         .header-title {
             font-size: 15pt;
             font-weight: bold;
-            color: #1e3a5f;
+            color: #4338ca;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 2px;
@@ -64,7 +94,7 @@
            DOCUMENT BADGE - Identificação
         ======================================== */
         .doc-badge {
-            background: #1e3a5f;
+            background: #4338ca;
             color: #ffffff;
             text-align: center;
             padding: 14px 20px;
@@ -101,50 +131,42 @@
         }
 
         /* ========================================
-           INFO CARDS - Para/De
+           RECIPIENT BOX - Destinatário
         ======================================== */
-        .info-cards {
-            display: table;
-            width: 100%;
+        .recipient-box {
+            background: #f5f3ff;
+            border-left: 4px solid #4338ca;
+            padding: 14px 18px;
             margin: 20px 0;
-            border-collapse: separate;
-            border-spacing: 10px 0;
         }
 
-        .info-card {
-            display: table-cell;
-            width: 50%;
-            vertical-align: top;
-            background: #f7f9fc;
-            border: 1px solid #e2e8f0;
-            padding: 0;
-        }
-
-        .info-card-header {
-            background: #1e3a5f;
-            color: #ffffff;
-            padding: 8px 12px;
-            font-size: 9pt;
+        .recipient-label {
+            font-size: 8pt;
             font-weight: bold;
+            color: #4338ca;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
-        .info-card-body {
-            padding: 12px;
-        }
-
-        .info-card-name {
+        .recipient-name {
             font-size: 11pt;
             font-weight: bold;
             color: #1a1a2e;
-            margin-bottom: 4px;
         }
 
-        .info-card-role {
+        .recipient-role {
             font-size: 9pt;
             color: #64748b;
             font-style: italic;
+            margin-top: 2px;
+        }
+
+        .recipient-institution {
+            font-size: 9pt;
+            color: #4338ca;
+            font-weight: bold;
+            margin-top: 4px;
         }
 
         /* ========================================
@@ -152,6 +174,7 @@
         ======================================== */
         .subject-box {
             background: #eef2f7;
+            border-left: 4px solid #4338ca;
             padding: 14px 18px;
             margin: 20px 0;
         }
@@ -159,7 +182,7 @@
         .subject-label {
             font-size: 8pt;
             font-weight: bold;
-            color: #1e3a5f;
+            color: #4338ca;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 6px;
@@ -226,7 +249,7 @@
             font-size: 10pt;
             font-weight: bold;
             text-transform: uppercase;
-            color: #1e3a5f;
+            color: #4338ca;
             letter-spacing: 0.5px;
             margin-bottom: 3px;
         }
@@ -267,80 +290,67 @@
         .no-break {
             page-break-inside: avoid;
         }
-
-        .divider {
-            border: 0;
-            border-top: 1px solid #e2e8f0;
-            margin: 15px 0;
-        }
     </style>
 </head>
 
 <body>
     <!-- HEADER -->
     <div class="header">
-        @php
-            $logoPath = public_path('images/header-logos.png');
-            if (file_exists($logoPath)) {
-                $logoData = base64_encode(file_get_contents($logoPath));
-                $logoSrc = 'data:image/png;base64,' . $logoData;
-            } else {
-                $logoSrc = null;
-            }
-        @endphp
-        @if($logoSrc)
-            <img src="{{ $logoSrc }}" alt="Logos" class="header-logo">
-        @endif
-        <div class="header-title">Prefeitura Municipal de Lagoa Santa</div>
-        <div class="header-subtitle">Estado de Minas Gerais</div>
+        <div class="header-logos">
+            <div class="header-logo-left">
+                <?php if(file_exists(public_path('images/brasao-lagoa-santa.png'))): ?>
+                    <img src="<?php echo e(public_path('images/brasao-lagoa-santa.png')); ?>" alt="Brasão">
+                <?php endif; ?>
+            </div>
+            <div class="header-center">
+                <div class="header-title">Prefeitura Municipal de Lagoa Santa</div>
+                <div class="header-subtitle">Estado de Minas Gerais</div>
+            </div>
+            <div class="header-logo-right">
+                <?php if(file_exists(public_path('images/logos-completas.png'))): ?>
+                    <img src="<?php echo e(public_path('images/logos-completas.png')); ?>" alt="Logo">
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 
     <!-- DOCUMENT BADGE -->
     <div class="doc-badge">
-        <div class="doc-badge-title">Comunicação Interna</div>
+        <div class="doc-badge-title">Ofício</div>
         <div class="doc-badge-number">
-            Nº {{ $communication->code }}@if($communication->department)/{{ $communication->department }}@endif
+            Nº <?php echo e($oficio->code); ?><?php if($oficio->department): ?> / <?php echo e($oficio->department); ?><?php endif; ?>
         </div>
     </div>
 
     <!-- META INFO -->
     <div class="meta-info">
-        <div class="meta-date">Lagoa Santa/MG, {{ $communication->formatted_date }}</div>
+        <div class="meta-date">Lagoa Santa/MG, <?php echo e($oficio->formatted_date); ?></div>
     </div>
 
-    <!-- INFO CARDS -->
-    <div class="info-cards">
-        <div class="info-card">
-            <div class="info-card-header">De</div>
-            <div class="info-card-body">
-                <div class="info-card-name">{{ $communication->sender_name }}</div>
-                @if($communication->sender_role)
-                    <div class="info-card-role">{{ $communication->sender_role }}</div>
-                @endif
-            </div>
-        </div>
-        <div class="info-card">
-            <div class="info-card-header">Para</div>
-            <div class="info-card-body">
-                <div class="info-card-name">{{ $communication->recipient_name }}</div>
-                @if($communication->recipient_role)
-                    <div class="info-card-role">{{ $communication->recipient_role }}</div>
-                @endif
-            </div>
-        </div>
+    <!-- RECIPIENT BOX -->
+    <div class="recipient-box">
+        <div class="recipient-label">Destinatário</div>
+        <div class="recipient-name"><?php echo e($oficio->recipient_name); ?></div>
+        <?php if($oficio->recipient_role): ?>
+            <div class="recipient-role"><?php echo e($oficio->recipient_role); ?></div>
+        <?php endif; ?>
+        <?php if($oficio->recipient_institution): ?>
+            <div class="recipient-institution"><?php echo e($oficio->recipient_institution); ?></div>
+        <?php endif; ?>
     </div>
 
     <!-- SUBJECT BOX -->
     <div class="subject-box">
         <div class="subject-label">Assunto</div>
-        <div class="subject-text">{{ $communication->subject }}</div>
+        <div class="subject-text"><?php echo e($oficio->subject); ?></div>
     </div>
 
     <!-- CONTENT -->
     <div class="content">
         <div class="content-greeting">Prezado(a) Senhor(a),</div>
         <div class="content-body">
-            {!! $communication->formatted_content !!}
+            <?php echo $oficio->formatted_content; ?>
+
         </div>
     </div>
 
@@ -349,19 +359,19 @@
         <div class="signature-closing">Atenciosamente,</div>
         <div class="signature-block">
             <div class="signature-line"></div>
-            <div class="signature-name">{{ strtoupper($communication->sender_name) }}</div>
-            @if($communication->sender_role)
-                <div class="signature-role">{{ $communication->sender_role }}</div>
-            @endif
+            <div class="signature-name"><?php echo e(strtoupper($oficio->sender_name)); ?></div>
+            <?php if($oficio->sender_role): ?>
+                <div class="signature-role"><?php echo e($oficio->sender_role); ?></div>
+            <?php endif; ?>
         </div>
     </div>
 
     <!-- FOOTER -->
     <div class="footer">
         <div class="footer-text">Prefeitura Municipal de Lagoa Santa — Estado de Minas Gerais</div>
-        <div class="footer-gen">Documento gerado eletronicamente em {{ now()->format('d/m/Y H:i') }}</div>
+        <div class="footer-gen">Documento gerado eletronicamente em <?php echo e(now()->format('d/m/Y H:i')); ?></div>
     </div>
 
 </body>
 
-</html>
+</html><?php /**PATH C:\Projects\contratos\resources\views/pdf/oficio.blade.php ENDPATH**/ ?>

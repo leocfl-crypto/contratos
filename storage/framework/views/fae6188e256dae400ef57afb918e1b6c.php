@@ -38,40 +38,10 @@
             border-bottom: 3px solid #1e3a5f;
         }
 
-        .header-logos {
-            display: table;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-
-        .header-logo-left {
-            display: table-cell;
-            width: 70px;
-            vertical-align: middle;
-        }
-
-        .header-logo-left img {
-            width: 55px;
+        .header-logo {
+            max-width: 180px;
             height: auto;
-        }
-
-        .header-center {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-            padding: 0 10px;
-        }
-
-        .header-logo-right {
-            display: table-cell;
-            width: 90px;
-            vertical-align: middle;
-            text-align: right;
-        }
-
-        .header-logo-right img {
-            width: 75px;
-            height: auto;
+            margin-bottom: 10px;
         }
 
         .header-title {
@@ -182,7 +152,6 @@
         ======================================== */
         .subject-box {
             background: #eef2f7;
-            border-left: 4px solid #1e3a5f;
             padding: 14px 18px;
             margin: 20px 0;
         }
@@ -310,29 +279,27 @@
 <body>
     <!-- HEADER -->
     <div class="header">
-        <div class="header-logos">
-            <div class="header-logo-left">
-                <?php if(file_exists(public_path('images/brasao-lagoa-santa.png'))): ?>
-                    <img src="<?php echo e(public_path('images/brasao-lagoa-santa.png')); ?>" alt="Brasão">
-                <?php endif; ?>
-            </div>
-            <div class="header-center">
-                <div class="header-title">Prefeitura Municipal de Lagoa Santa</div>
-                <div class="header-subtitle">Estado de Minas Gerais</div>
-            </div>
-            <div class="header-logo-right">
-                <?php if(file_exists(public_path('images/logos-completas.png'))): ?>
-                    <img src="<?php echo e(public_path('images/logos-completas.png')); ?>" alt="Logo">
-                <?php endif; ?>
-            </div>
-        </div>
+        <?php
+            $logoPath = public_path('images/header-logos.png');
+            if (file_exists($logoPath)) {
+                $logoData = base64_encode(file_get_contents($logoPath));
+                $logoSrc = 'data:image/png;base64,' . $logoData;
+            } else {
+                $logoSrc = null;
+            }
+        ?>
+        <?php if($logoSrc): ?>
+            <img src="<?php echo e($logoSrc); ?>" alt="Logos" class="header-logo">
+        <?php endif; ?>
+        <div class="header-title">Prefeitura Municipal de Lagoa Santa</div>
+        <div class="header-subtitle">Estado de Minas Gerais</div>
     </div>
 
     <!-- DOCUMENT BADGE -->
     <div class="doc-badge">
         <div class="doc-badge-title">Comunicação Interna</div>
         <div class="doc-badge-number">
-            Nº <?php echo e($communication->code); ?><?php if($communication->department): ?> / <?php echo e($communication->department); ?><?php endif; ?>
+            Nº <?php echo e($communication->code); ?><?php if($communication->department): ?>/<?php echo e($communication->department); ?><?php endif; ?>
         </div>
     </div>
 
@@ -344,20 +311,20 @@
     <!-- INFO CARDS -->
     <div class="info-cards">
         <div class="info-card">
-            <div class="info-card-header">Para</div>
-            <div class="info-card-body">
-                <div class="info-card-name"><?php echo e($communication->recipient_name); ?></div>
-                <?php if($communication->recipient_role): ?>
-                    <div class="info-card-role"><?php echo e($communication->recipient_role); ?></div>
-                <?php endif; ?>
-            </div>
-        </div>
-        <div class="info-card">
             <div class="info-card-header">De</div>
             <div class="info-card-body">
                 <div class="info-card-name"><?php echo e($communication->sender_name); ?></div>
                 <?php if($communication->sender_role): ?>
                     <div class="info-card-role"><?php echo e($communication->sender_role); ?></div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <div class="info-card">
+            <div class="info-card-header">Para</div>
+            <div class="info-card-body">
+                <div class="info-card-name"><?php echo e($communication->recipient_name); ?></div>
+                <?php if($communication->recipient_role): ?>
+                    <div class="info-card-role"><?php echo e($communication->recipient_role); ?></div>
                 <?php endif; ?>
             </div>
         </div>
