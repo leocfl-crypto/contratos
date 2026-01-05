@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { 
     LayoutDashboard, 
     FileText, 
@@ -26,78 +27,114 @@ import {
     Mail,
     MailPlus,
     FileStack,
+    Users,
+    CalendarDays,
+    CalendarPlus,
+    ClipboardCheck,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutDashboard,
-    },
-    {
-        title: 'Documentos',
-        icon: FileText,
-        items: [
-            {
-                title: 'Listar Documentos',
-                href: '/contratos',
-                icon: FileText,
-            },
-            {
-                title: 'Novo Contrato',
-                href: '/contratos/novo',
-                icon: FilePlus,
-            },
-            {
-                title: 'Comunicação Interna',
-                href: '/comunicacoes-internas',
-                icon: Mail,
-            },
-            {
-                title: 'Nova Comunicação',
-                href: '/comunicacoes-internas/nova',
-                icon: MailPlus,
-            },
-            {
-                title: 'Ofícios',
-                href: '/oficios',
-                icon: FileStack,
-            },
-            {
-                title: 'Novo Ofício',
-                href: '/oficios/novo',
-                icon: FileStack,
-            },
-        ],
-    },
-    {
-        title: 'Configurações',
-        icon: Settings,
-        items: [
-            {
-                title: 'Perfil',
-                href: '/settings/profile',
-                icon: User,
-            },
-            {
-                title: 'Senha',
-                href: '/settings/password',
-                icon: Lock,
-            },
-            {
-                title: 'Aparência',
-                href: '/settings/appearance',
-                icon: Palette,
-            },
-            {
-                title: 'Autenticação 2FA',
-                href: '/settings/two-factor',
-                icon: Shield,
-            },
-        ],
-    },
-];
+const page = usePage();
+const isAdmin = computed(() => page.props.auth?.user?.is_admin ?? false);
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const rhItems: NavItem[] = [
+        {
+            title: 'Minhas Férias',
+            href: '/ferias',
+            icon: CalendarDays,
+        },
+        {
+            title: 'Solicitar Férias',
+            href: '/ferias/nova',
+            icon: CalendarPlus,
+        },
+    ];
+
+    // Adicionar menu de aprovação apenas para admins
+    if (isAdmin.value) {
+        rhItems.push({
+            title: 'Aprovar Férias',
+            href: '/ferias/aprovacoes',
+            icon: ClipboardCheck,
+        });
+    }
+
+    return [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutDashboard,
+        },
+        {
+            title: 'Documentos',
+            icon: FileText,
+            items: [
+                {
+                    title: 'Listar Documentos',
+                    href: '/contratos',
+                    icon: FileText,
+                },
+                {
+                    title: 'Novo Contrato',
+                    href: '/contratos/novo',
+                    icon: FilePlus,
+                },
+                {
+                    title: 'Comunicação Interna',
+                    href: '/comunicacoes-internas',
+                    icon: Mail,
+                },
+                {
+                    title: 'Nova Comunicação',
+                    href: '/comunicacoes-internas/nova',
+                    icon: MailPlus,
+                },
+                {
+                    title: 'Ofícios',
+                    href: '/oficios',
+                    icon: FileStack,
+                },
+                {
+                    title: 'Novo Ofício',
+                    href: '/oficios/novo',
+                    icon: FileStack,
+                },
+            ],
+        },
+        {
+            title: 'RH',
+            icon: Users,
+            items: rhItems,
+        },
+        {
+            title: 'Configurações',
+            icon: Settings,
+            items: [
+                {
+                    title: 'Perfil',
+                    href: '/settings/profile',
+                    icon: User,
+                },
+                {
+                    title: 'Senha',
+                    href: '/settings/password',
+                    icon: Lock,
+                },
+                {
+                    title: 'Aparência',
+                    href: '/settings/appearance',
+                    icon: Palette,
+                },
+                {
+                    title: 'Autenticação 2FA',
+                    href: '/settings/two-factor',
+                    icon: Shield,
+                },
+            ],
+        },
+    ];
+});
 </script>
 
 <template>

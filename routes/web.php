@@ -120,6 +120,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/oficios', [App\Http\Controllers\OficioController::class, 'store'])->name('oficios.store');
     Route::get('/oficios/{id}', [App\Http\Controllers\OficioController::class, 'show'])->name('oficios.show');
     Route::get('/oficios/{id}/pdf', [App\Http\Controllers\OficioController::class, 'exportPdf'])->name('oficios.pdf');
+
+    // Férias routes
+    Route::get('/ferias', [App\Http\Controllers\VacationRequestController::class, 'index'])->name('ferias.index');
+    Route::get('/ferias/nova', [App\Http\Controllers\VacationRequestController::class, 'create'])->name('ferias.create');
+    Route::post('/ferias', [App\Http\Controllers\VacationRequestController::class, 'store'])->name('ferias.store');
+    Route::get('/ferias/{id}', [App\Http\Controllers\VacationRequestController::class, 'show'])->name('ferias.show');
+    Route::patch('/ferias/{id}/cancelar', [App\Http\Controllers\VacationRequestController::class, 'cancel'])->name('ferias.cancel');
+
+    // Rotas de aprovação de férias (apenas admin)
+    Route::middleware('admin')->group(function () {
+        Route::get('/ferias/aprovacoes', [App\Http\Controllers\VacationRequestController::class, 'pendingApprovals'])->name('ferias.approvals');
+        Route::patch('/ferias/{id}/aprovar', [App\Http\Controllers\VacationRequestController::class, 'approve'])->name('ferias.approve');
+        Route::patch('/ferias/{id}/rejeitar', [App\Http\Controllers\VacationRequestController::class, 'reject'])->name('ferias.reject');
+    });
 });
 
 require __DIR__ . '/auth.php';

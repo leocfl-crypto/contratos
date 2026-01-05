@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin',
     ];
 
     /**
@@ -47,6 +48,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
+            'is_admin' => 'boolean',
         ];
     }
+
+    /**
+     * Get the vacation requests for the user.
+     */
+    public function vacationRequests()
+    {
+        return $this->hasMany(VacationRequest::class);
+    }
+
+    /**
+     * Get the vacation balance for current year.
+     */
+    public function vacationBalance()
+    {
+        return $this->hasOne(VacationBalance::class)->where('year', date('Y'));
+    }
+
+    /**
+     * Get or create vacation balance for a specific year.
+     */
+    public function getVacationBalance(?string $year = null)
+    {
+        return VacationBalance::getOrCreateForUser($this->id, $year);
+    }
 }
+
