@@ -1,25 +1,75 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
+import { FileText } from 'lucide-vue-next';
 </script>
 
 <template>
-    <div class="login-gradient-bg min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-        <!-- Decorative floating shapes -->
-        <div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl floating-shape"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl floating-shape-reverse"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-300/10 rounded-full blur-3xl floating-shape" style="animation-delay: -3s;"></div>
-
-        <div class="relative z-10 w-full max-w-md animate-scale-in">
-            <!-- Logo Container -->
-            <div class="text-center mb-8 animate-fade-in">
-                <Link href="/" class="inline-block">
-                    <ApplicationLogo class="h-16 w-16 mx-auto fill-current text-white drop-shadow-lg hover-scale" />
-                </Link>
+    <div class="min-h-screen flex flex-col md:flex-row overflow-hidden bg-white">
+        <!-- Left Panel: Institutional Branding -->
+        <div class="hidden md:flex md:w-[55%] lg:w-[60%] relative overflow-hidden bg-gradient-to-br from-[#1e293b] via-[#0f172a] to-[#020617] items-center justify-center p-12">
+            <!-- Background Decorative Elements -->
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-500 rounded-full blur-[120px]"></div>
+                <div class="absolute bottom-[10%] right-[10%] w-[30%] h-[30%] bg-indigo-500 rounded-full blur-[100px]"></div>
             </div>
 
-            <!-- Login Card -->
-            <div class="login-card p-8 sm:p-10 animate-slide-up">
+            <div class="relative z-10 text-center max-w-xl">
+                <!-- Unified Institutional Logo -->
+                <div class="flex items-center justify-center mb-12">
+                    <img src="/images/logos-completas.png" alt="Prefeitura Municipal de Lagoa Santa" class="h-32 w-auto drop-shadow-2xl brightness-110" />
+                </div>
+
+                <!-- Titles -->
+                <div class="space-y-4 mb-16">
+                    <h1 class="text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Prefeitura Municipal de <br/>
+                        <span class="text-blue-400">Lagoa Santa</span>
+                    </h1>
+                    <div class="h-1 w-24 bg-blue-500 mx-auto rounded-full"></div>
+                    <h2 class="text-xl lg:text-2xl font-medium text-slate-300">
+                        Sistema de Gestão de Documentos
+                    </h2>
+                    <p class="text-slate-400 text-lg">
+                        Gerencie e organize contratos, comunicações e ofícios de forma simples e eficiente.
+                    </p>
+                </div>
+
+                <!-- Illustration placeholder - using a clean SVG/Icon group -->
+                <div class="relative mt-auto">
+                    <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl inline-block transform -rotate-1 hover:rotate-0 transition-transform duration-500">
+                        <div class="flex items-center gap-4 text-white/80 opacity-60">
+                            <div class="p-4 bg-blue-500/20 rounded-2xl">
+                                <FileText class="w-12 h-12 text-blue-400" />
+                            </div>
+                            <div class="flex flex-col text-left">
+                                <span class="text-sm font-bold uppercase tracking-wider text-blue-400">Módulo Administrativo</span>
+                                <span class="text-xl font-medium">Controle de Documentos 3.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer for Left Column -->
+            <div class="absolute bottom-8 left-0 w-full text-center">
+                <p class="text-slate-500 text-sm font-medium tracking-wide">
+                    Prefeitura Municipal de Lagoa Santa © 2026
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Panel: Login Form Area -->
+        <div class="flex-1 flex items-center justify-center p-6 sm:p-12 bg-slate-50 relative">
+            <div class="absolute inset-0 bg-grid-slate-200/[0.3] pointer-events-none"></div>
+            
+            <div class="w-full max-w-md relative z-10">
+                <!-- Mobile Logo -->
+                <div class="md:hidden text-center mb-8">
+                    <img src="/images/logos-completas.png" alt="Logo" class="h-20 mx-auto mb-4" />
+                    <h2 class="text-2xl font-bold text-slate-900">Gestão de Documentos</h2>
+                </div>
+
                 <slot />
             </div>
         </div>
@@ -27,22 +77,14 @@ import { Link } from '@inertiajs/vue3';
 </template>
 
 <style scoped>
-/* Additional scoped animations */
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg);
-    }
-    50% {
-        transform: translateY(-20px) rotate(5deg);
-    }
+.bg-grid-slate-200 {
+    background-image: radial-gradient(circle, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
 }
 
-@keyframes float-reverse {
-    0%, 100% {
-        transform: translateY(0) rotate(0deg);
-    }
-    50% {
-        transform: translateY(20px) rotate(-5deg);
-    }
+/* Base animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
 }
 </style>
