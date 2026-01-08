@@ -3,7 +3,8 @@ import Checkbox from '@/components/Checkbox.vue';
 import GuestLayout from '@/layouts/GuestLayout.vue';
 import InputError from '@/components/InputError.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Mail, Lock, ArrowRight, User as UserIcon, Info } from 'lucide-vue-next';
+import { Mail, Lock, ArrowRight, User as UserIcon, Info, Eye, EyeOff } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 defineProps({
     canResetPassword: {
@@ -13,6 +14,8 @@ defineProps({
         type: String,
     },
 });
+
+const showPassword = ref(false);
 
 const form = useForm({
     email: '',
@@ -85,12 +88,19 @@ const submit = () => {
                         </div>
                         <input
                             id="password"
-                            type="password"
-                            class="w-full bg-slate-50 border-2 border-slate-200 text-slate-900 placeholder-slate-400 rounded-xl py-4 pl-12 pr-4 focus:bg-white focus:border-slate-900 focus:ring-0 focus:outline-none transition-all duration-300 shadow-sm"
+                            :type="showPassword ? 'text' : 'password'"
+                            class="w-full bg-slate-50 border-2 border-slate-200 text-slate-900 placeholder-slate-400 rounded-xl py-4 pl-12 pr-12 focus:bg-white focus:border-slate-900 focus:ring-0 focus:outline-none transition-all duration-300 shadow-sm"
                             v-model="form.password"
                             required
                             placeholder="••••••••"
                         />
+                        <button
+                            type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                        >
+                            <component :is="showPassword ? EyeOff : Eye" :size="20" />
+                        </button>
                     </div>
                     <InputError class="mt-2 text-xs text-rose-600 font-medium" :message="form.errors.password" />
                 </div>

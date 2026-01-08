@@ -55,48 +55,10 @@ const { isMobile, state } = useSidebar();
 
 <style scoped>
 .user-menu-button {
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.user-menu-button::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        135deg,
-        hsl(var(--primary) / 0.05) 0%,
-        transparent 100%
-    );
-    opacity: 0;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 0.75rem;
-}
-
-.user-menu-button:hover::before {
-    opacity: 1;
-}
-
-.user-menu-button:hover {
-    background: linear-gradient(
-        135deg,
-        hsl(var(--sidebar-accent)) 0%,
-        hsl(var(--sidebar-accent) / 0.5) 100%
-    );
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px hsl(var(--primary) / 0.1);
+    @apply flex items-center gap-3 w-full px-3 py-2 rounded-xl text-gray-700 font-medium transition-all duration-200 hover:bg-gray-50 !important;
 }
 
 .user-menu-button[data-state="open"] {
-    background: linear-gradient(
-        135deg,
-        hsl(var(--sidebar-accent)) 0%,
-        hsl(var(--sidebar-accent) / 0.7) 100%
-    );
-    box-shadow: 0 4px 12px hsl(var(--primary) / 0.15);
+    @apply bg-gray-50 shadow-sm !important;
 }
 </style>

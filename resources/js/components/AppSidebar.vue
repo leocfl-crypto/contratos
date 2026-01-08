@@ -22,7 +22,6 @@ import {
     User,
     Lock,
     Palette,
-    FileEdit,
     Shield,
     Mail,
     MailPlus,
@@ -52,7 +51,6 @@ const mainNavItems = computed<NavItem[]>(() => {
         },
     ];
 
-    // Adicionar menu de aprovação apenas para admins
     if (isAdmin.value) {
         rhItems.push({
             title: 'Aprovar Férias',
@@ -144,20 +142,22 @@ const mainNavItems = computed<NavItem[]>(() => {
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset" class="sidebar-modern">
+    <Sidebar collapsible="icon" class="sidebar-modern">
         <SidebarHeader class="sidebar-header">
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child class="sidebar-brand">
+                    <SidebarMenuButton size="lg" as-child class="sidebar-brand group/brand">
                         <Link :href="dashboard()">
-                            <div class="flex items-center gap-3 w-full">
-                                <AppLogo class="h-8 w-8" />
-                                <div class="flex flex-col flex-1 min-w-0">
-                                    <span class="truncate font-bold text-lg leading-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                        DocManager
-                                    </span>
-                                    <span class="text-xs text-muted-foreground tracking-wide">
+                            <div class="flex items-center gap-3 w-full overflow-hidden">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-indigo-700 shadow-md group-hover/brand:scale-110 transition-transform duration-300">
+                                    <AppLogo class="h-6 w-6 text-white" />
+                                </div>
+                                <div class="flex flex-col flex-1 min-w-0 opacity-100 group-data-[collapsible=icon]:opacity-0 transition-opacity duration-300">
+                                    <span class="text-[9px] uppercase font-black text-primary-400 tracking-[0.2em] leading-none mb-1">
                                         Gestão de Documentos
+                                    </span>
+                                    <span class="truncate font-black text-xl leading-none bg-gradient-to-r from-primary-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">
+                                        DocManager
                                     </span>
                                 </div>
                             </div>
@@ -167,41 +167,36 @@ const mainNavItems = computed<NavItem[]>(() => {
             </SidebarMenu>
         </SidebarHeader>
 
-        <SidebarContent class="sidebar-content">
+        <SidebarContent class="sidebar-content mt-4">
             <NavMain :items="mainNavItems" />
         </SidebarContent>
 
-        <!-- User menu movido para o header -->
+        <SidebarFooter v-if="page.props.auth?.user" class="sidebar-footer border-t border-gray-100 p-4">
+            <NavUser />
+        </SidebarFooter>
     </Sidebar>
     <slot />
 </template>
 
 <style scoped>
 .sidebar-modern {
-    background: hsl(0 0% 100%);
-    border-right: 1px solid hsl(220 13% 91%);
+    @apply border-r border-gray-100 bg-white shadow-sm !important;
+}
+
+.sidebar-modern :deep([data-sidebar="sidebar"]) {
+    @apply bg-white !important;
 }
 
 .sidebar-header {
-    padding: 1.25rem 1rem;
-    border-bottom: none;
+    @apply px-4 pt-8 pb-2 border-none bg-white !important;
 }
 
 .sidebar-brand {
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-    background: transparent;
-}
-
-.sidebar-brand:hover {
-    background: hsl(220 14% 96%);
+    @apply h-auto py-2 px-1 hover:bg-transparent !important;
 }
 
 .sidebar-content {
-    padding: 0.75rem 0.5rem;
-    flex: 1;
-    overflow-y: auto;
+    @apply flex-1 overflow-y-auto px-2 bg-white !important;
 }
 
 .sidebar-content::-webkit-scrollbar {
@@ -213,16 +208,10 @@ const mainNavItems = computed<NavItem[]>(() => {
 }
 
 .sidebar-content::-webkit-scrollbar-thumb {
-    background: hsl(220 13% 85%);
-    border-radius: 2px;
-}
-
-.sidebar-content::-webkit-scrollbar-thumb:hover {
-    background: hsl(220 13% 75%);
+    @apply bg-gray-200 rounded-full hover:bg-gray-300;
 }
 
 .sidebar-footer {
-    padding: 1rem;
-    border-top: 1px solid hsl(220 13% 91%);
+    @apply bg-white border-t border-gray-50 p-2 mt-auto !important;
 }
 </style>
