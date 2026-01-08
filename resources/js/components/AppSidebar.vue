@@ -31,6 +31,7 @@ import {
     CalendarDays,
     CalendarPlus,
     ClipboardCheck,
+    Package,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -99,6 +100,11 @@ const mainNavItems = computed<NavItem[]>(() => {
                     title: 'Novo Ofício',
                     href: '/oficios/novo',
                     icon: FileStack,
+                },
+                {
+                    title: 'Carga Patrimonial',
+                    href: '/patrimonios',
+                    icon: Package,
                 },
             ],
         },

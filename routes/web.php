@@ -125,15 +125,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/ferias', [App\Http\Controllers\VacationRequestController::class, 'index'])->name('ferias.index');
     Route::get('/ferias/nova', [App\Http\Controllers\VacationRequestController::class, 'create'])->name('ferias.create');
     Route::post('/ferias', [App\Http\Controllers\VacationRequestController::class, 'store'])->name('ferias.store');
-    Route::get('/ferias/{id}', [App\Http\Controllers\VacationRequestController::class, 'show'])->name('ferias.show');
-    Route::patch('/ferias/{id}/cancelar', [App\Http\Controllers\VacationRequestController::class, 'cancel'])->name('ferias.cancel');
 
-    // Rotas de aprovação de férias (apenas admin)
+    // Rotas de aprovação de férias (apenas admin) - Devem vir antes de /ferias/{id}
     Route::middleware('admin')->group(function () {
         Route::get('/ferias/aprovacoes', [App\Http\Controllers\VacationRequestController::class, 'pendingApprovals'])->name('ferias.approvals');
-        Route::patch('/ferias/{id}/aprovar', [App\Http\Controllers\VacationRequestController::class, 'approve'])->name('ferias.approve');
-        Route::patch('/ferias/{id}/rejeitar', [App\Http\Controllers\VacationRequestController::class, 'reject'])->name('ferias.reject');
+        Route::patch('/ferias/{id}/aprovar', [App\Http\Controllers\VacationRequestController::class, 'approve'])->name('ferias.approve')->whereNumber('id');
+        Route::patch('/ferias/{id}/rejeitar', [App\Http\Controllers\VacationRequestController::class, 'reject'])->name('ferias.reject')->whereNumber('id');
     });
+
+    Route::get('/ferias/{id}', [App\Http\Controllers\VacationRequestController::class, 'show'])->name('ferias.show')->whereNumber('id');
+    Route::patch('/ferias/{id}/cancelar', [App\Http\Controllers\VacationRequestController::class, 'cancel'])->name('ferias.cancel')->whereNumber('id');
+
+    // Patrimônios routes
+    Route::resource('patrimonios', App\Http\Controllers\PatrimonioController::class);
 });
 
 require __DIR__ . '/auth.php';
