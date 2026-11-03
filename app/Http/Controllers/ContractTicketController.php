@@ -1,0 +1,338 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Resources\UserSummaryResource;
+use App\Models\ContractTicket;
+use App\Models\ContractTicketAttachment;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class ContractTicketController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        $user = $request->user();
+        $tickets = ContractTicket::query()
+            ->with(['user:id,name', 'responsible:id,name'])
+            ->when(! $user->canManageTickets(), fn ($query) => $query->where('user_id', $user->id))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn (ContractTicket $ticket) => [
+                ...$ticket->attributesToArray(),
+                'user' => UserSummaryResource::make($ticket->user)->resolve(),
+                'responsible' => $ticket->responsible
+                    ? UserSummaryResource::make($ticket->responsible)->resolve()
+                    : null,
+            ]);
+
+        return Inertia::render('Chamados/Index', [
+            'tickets' => $tickets,
+            'canManage' => $user->canManageTickets(),
+            'isAdmin' => $user->isAdministrator(),
+        ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        return Inertia::render('Chamados/Create', [
+            'categories' => ContractTicket::CATEGORIES,
+            'currentUser' => [
+                'name' => $request->user()->name,
+                'username' => $request->user()->username,
+            ],
+            'today' => now()->toDateString(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $requiresContractDetails = in_array(
+            $request->input('category'),
+            ['novo_processo', 'compra_direta'],
+            true,
+        );
+        $isNewProcess = $request->input('category') === 'novo_processo';
+
+        $validated = $request->validate([
+            'subject' => ['required', 'string', 'max:150'],
+            'category' => ['required', 'string', 'in:'.implode(',', ContractTicket::CATEGORIES)],
+            'description' => ['required', 'string', 'max:10000'],
+            'demandante' => [Rule::requiredIf($isNewProcess), 'nullable', 'string', 'max:255'],
+            'demandado' => [Rule::requiredIf($isNewProcess), 'nullable', 'string', 'max:255'],
+            'solucao_sugerida' => [Rule::requiredIf($isNewProcess), 'nullable', 'string', 'max:10000'],
+            'valor_estimado' => [
+                Rule::requiredIf($isNewProcess),
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:9999999999999.99',
+                'decimal:0,2',
+            ],
+            'data_demanda' => [Rule::requiredIf($isNewProcess), 'nullable', 'date'],
+            'duracao_contrato' => [Rule::requiredIf($isNewProcess), 'nullable', 'string', 'max:100'],
+            'specifications' => [
+                Rule::requiredIf($requiresContractDetails),
+                'nullable',
+                'string',
+                'max:10000',
+            ],
+            'justification' => [
+                Rule::requiredIf($requiresContractDetails),
+                'nullable',
+                'string',
+                'max:10000',
+            ],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:4294967295', 'regex:/^[0-9]+$/'],
+            'unit' => [
+                Rule::requiredIf($request->filled('quantity')),
+                'nullable',
+                'string',
+                Rule::in(['UN', 'CX']),
+            ],
+            'ficha' => [
+                Rule::requiredIf($requiresContractDetails),
+                'nullable',
+                'string',
+                'max:100',
+                'regex:/^[0-9]+$/',
+            ],
+            'dotacao' => ['nullable', 'string', 'max:100', 'regex:/^[0-9]+$/'],
+            'in_pca' => [
+                Rule::requiredIf($requiresContractDetails),
+                'boolean',
+                Rule::in($requiresContractDetails ? [true, 1, '1'] : [true, false, 1, 0, '1', '0']),
+            ],
+            'involves_other_secretariats' => [
+                Rule::requiredIf($requiresContractDetails),
+                'boolean',
+            ],
+            'other_fichas' => [
+                Rule::requiredIf($request->boolean('involves_other_secretariats')),
+                'nullable',
+                'array',
+                'min:1',
+            ],
+            'other_fichas.*' => ['required', 'string', 'max:100', 'regex:/^[0-9]+$/'],
+            'attachments' => [
+                Rule::requiredIf(! $isNewProcess),
+                'nullable',
+                'array',
+                'min:1',
+                'max:5',
+            ],
+            'attachments.*' => ['required', 'file', 'max:10240', 'mimes:pdf', 'extensions:pdf'],
+        ], [
+            'in_pca.in' => 'Não é possível prosseguir com a demanda, pois ela não está prevista no PCA.',
+            'ficha.regex' => 'A ficha deve conter apenas números.',
+            'dotacao.regex' => 'A dotação deve conter apenas números.',
+            'quantity.regex' => 'A quantidade deve conter apenas números.',
+            'other_fichas.*.regex' => 'A ficha deve conter apenas números.',
+        ]);
+
+        $ticket = ContractTicket::create([
+            'subject' => $validated['subject'],
+            'category' => $validated['category'],
+            'description' => $validated['description'],
+            'demandante' => $isNewProcess ? $validated['demandante'] : null,
+            'responsavel' => $isNewProcess ? $request->user()->name : null,
+            'matricula' => $isNewProcess ? $request->user()->username : null,
+            'demandado' => $isNewProcess ? $validated['demandado'] : null,
+            'solucao_sugerida' => $isNewProcess ? $validated['solucao_sugerida'] : null,
+            'valor_estimado' => $isNewProcess ? $validated['valor_estimado'] : null,
+            'data_demanda' => $isNewProcess ? $validated['data_demanda'] : null,
+            'duracao_contrato' => $isNewProcess ? $validated['duracao_contrato'] : null,
+            'specifications' => $requiresContractDetails
+                ? $validated['specifications']
+                : null,
+            'justification' => $requiresContractDetails
+                ? $validated['justification']
+                : null,
+            'quantity' => $requiresContractDetails
+                ? ($validated['quantity'] ?? null)
+                : null,
+            'unit' => $requiresContractDetails
+                ? ($validated['unit'] ?? null)
+                : null,
+            'ficha' => $requiresContractDetails
+                ? $validated['ficha']
+                : null,
+            'dotacao' => $requiresContractDetails
+                ? ($validated['dotacao'] ?? null)
+                : null,
+            'in_pca' => $requiresContractDetails
+                ? $validated['in_pca']
+                : null,
+            'involves_other_secretariats' => $requiresContractDetails
+                ? $validated['involves_other_secretariats']
+                : null,
+            'other_fichas' => $requiresContractDetails
+                && $request->boolean('involves_other_secretariats')
+                    ? $validated['other_fichas']
+                    : null,
+            'user_id' => $request->user()->id,
+        ]);
+
+        foreach ($request->file('attachments', []) as $file) {
+            $path = $file->store('contract-ticket-attachments/'.$ticket->id, 'local');
+
+            if ($path === false) {
+                throw new \RuntimeException('Não foi possível salvar um anexo do chamado.');
+            }
+
+            $ticket->attachments()->create([
+                'original_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+                'file_size' => $file->getSize(),
+            ]);
+        }
+
+        return redirect()
+            ->route('chamados.show', $ticket)
+            ->with('success', 'Chamado enviado para a Gestão de Contratos.');
+    }
+
+    public function show(Request $request, ContractTicket $ticket): Response
+    {
+        abort_unless($request->user()->canManageTickets() || $ticket->user_id === $request->user()->id, 403);
+
+        $ticket->load([
+            'user:id,name',
+            'responsible:id,name',
+            'attachments',
+            'messages.user:id,name,role',
+        ]);
+
+        return Inertia::render('Chamados/Show', [
+            'ticket' => [
+                ...$ticket->attributesToArray(),
+                'user' => UserSummaryResource::make($ticket->user)->resolve(),
+                'responsible' => $ticket->responsible
+                    ? UserSummaryResource::make($ticket->responsible)->resolve()
+                    : null,
+                'attachments' => $ticket->attachments->map(
+                    fn (ContractTicketAttachment $attachment) => $attachment->toArray(),
+                )->all(),
+                'messages' => $ticket->messages->map(fn ($message) => [
+                    'id' => $message->id,
+                    'message' => $message->message,
+                    'created_at' => $message->created_at->toISOString(),
+                    'author' => [
+                        'id' => $message->user->id,
+                        'name' => $message->user->name,
+                        'is_manager' => $message->user->canManageTickets(),
+                    ],
+                ])->all(),
+            ],
+            'canManage' => $request->user()->canManageTickets(),
+            'isAdmin' => $request->user()->isAdministrator(),
+            'statuses' => ContractTicket::MANAGEMENT_STATUSES,
+            'responsibles' => User::query()
+                ->whereIn('role', [User::ROLE_ADMINISTRATOR, User::ROLE_MANAGER])
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (User $user) => UserSummaryResource::make($user)->resolve()),
+        ]);
+    }
+
+    public function storeMessage(Request $request, ContractTicket $ticket): RedirectResponse
+    {
+        abort_unless($request->user()->canManageTickets() || $ticket->user_id === $request->user()->id, 403);
+
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'max:5000'],
+        ]);
+
+        $ticket->messages()->create([
+            'user_id' => $request->user()->id,
+            'message' => $validated['message'],
+        ]);
+
+        return back()->with('success', 'Mensagem enviada com sucesso.');
+    }
+
+    public function exportPdf(Request $request, ContractTicket $ticket)
+    {
+        abort_unless($request->user()->canManageTickets() || $ticket->user_id === $request->user()->id, 403);
+
+        $ticket->load(['user:id,name,username', 'responsible:id,name']);
+
+        return Pdf::loadView('pdf.contract-ticket', [
+            'ticket' => $ticket,
+        ])
+            ->setPaper('A4')
+            ->download('demanda-'.$ticket->id.'.pdf');
+    }
+
+    public function downloadAttachment(Request $request, ContractTicketAttachment $attachment): StreamedResponse
+    {
+        abort_unless(
+            $request->user()->canManageTickets() || $attachment->ticket()->where('user_id', $request->user()->id)->exists(),
+            403
+        );
+        abort_unless(Storage::disk('local')->exists($attachment->file_path), 404, 'Anexo não encontrado.');
+
+        return Storage::disk('local')->download($attachment->file_path, $attachment->original_name);
+    }
+
+    public function update(Request $request, ContractTicket $ticket): RedirectResponse
+    {
+        abort_if(in_array($ticket->status, ContractTicket::DECISION_STATUSES, true), 409, 'O chamado já foi decidido.');
+
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:'.implode(',', ContractTicket::MANAGEMENT_STATUSES)],
+            'management_response' => ['nullable', 'string', 'max:10000'],
+            'responsible_user_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->whereIn('role', [User::ROLE_ADMINISTRATOR, User::ROLE_MANAGER]),
+            ],
+        ]);
+
+        $ticket->update($validated);
+
+        return back()->with('success', 'Chamado atualizado com sucesso.');
+    }
+
+    public function decide(Request $request, ContractTicket $ticket): RedirectResponse
+    {
+        abort_if(in_array($ticket->status, ContractTicket::DECISION_STATUSES, true), 409, 'O chamado já foi decidido.');
+
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:'.implode(',', ContractTicket::DECISION_STATUSES)],
+        ]);
+
+        $ticket->update($validated);
+
+        return back()->with(
+            'success',
+            $ticket->status === 'aprovado'
+                ? 'Chamado aprovado com sucesso.'
+                : 'Chamado recusado com sucesso.',
+        );
+    }
+
+    public function destroy(ContractTicket $ticket): RedirectResponse
+    {
+        foreach ($ticket->attachments as $attachment) {
+            if (! Storage::disk('local')->delete($attachment->file_path)) {
+                throw new \RuntimeException('Não foi possível remover os anexos do chamado.');
+            }
+        }
+
+        $ticket->delete();
+
+        return redirect()
+            ->route('chamados.index')
+            ->with('success', 'Chamado excluído com sucesso.');
+    }
+}

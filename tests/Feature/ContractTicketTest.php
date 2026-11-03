@@ -1,0 +1,678 @@
+<?php
+
+use App\Models\ContractTicket;
+use App\Models\ContractTicketAttachment;
+use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Testing\AssertableInertia as Assert;
+
+it('only offers the three current demand categories in the create form', function () {
+    $employee = User::factory()->create([
+        'name' => 'Usuário de teste',
+        'username' => 'matricula123',
+    ]);
+
+    $this->actingAs($employee)
+        ->get(route('chamados.create'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Chamados/Create')
+            ->where('categories', ['novo_processo', 'compra_direta', 'renovacao'])
+            ->where('currentUser.name', 'Usuário de teste')
+            ->where('currentUser.username', 'matricula123')
+            ->where('today', now()->toDateString()));
+});
+
+it('creates a new process with DFD data and generates its PDF without requiring an uploaded DFD', function () {
+    $employee = User::factory()->create([
+        'name' => 'Maria Servidora',
+        'username' => 'matricula456',
+    ]);
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Aquisição de equipamentos',
+            'category' => 'novo_processo',
+            'description' => 'Os equipamentos atuais estão obsoletos.',
+            'demandante' => 'Secretaria de Administração',
+            'responsavel' => 'Outro usuário',
+            'matricula' => 'matricula-falsa',
+            'demandado' => 'Equipamentos de informática',
+            'solucao_sugerida' => 'Adquirir novos equipamentos.',
+            'valor_estimado' => '12500.50',
+            'data_demanda' => '2026-11-03',
+            'duracao_contrato' => '12 meses',
+            'specifications' => 'Equipamentos com garantia.',
+            'justification' => 'Necessidade de modernização.',
+            'ficha' => '123',
+            'in_pca' => true,
+            'involves_other_secretariats' => false,
+        ])
+        ->assertRedirect();
+
+    $ticket = ContractTicket::firstOrFail();
+
+    $this->assertDatabaseHas('contract_tickets', [
+        'id' => $ticket->id,
+        'demandante' => 'Secretaria de Administração',
+        'responsavel' => 'Maria Servidora',
+        'matricula' => 'matricula456',
+        'demandado' => 'Equipamentos de informática',
+        'description' => 'Os equipamentos atuais estão obsoletos.',
+        'solucao_sugerida' => 'Adquirir novos equipamentos.',
+        'duracao_contrato' => '12 meses',
+    ]);
+    expect((string) $ticket->valor_estimado)->toBe('12500.50')
+        ->and($ticket->data_demanda->format('Y-m-d'))->toBe('2026-11-03');
+
+    $this->get(route('chamados.pdf', $ticket))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf')
+        ->assertHeader('content-disposition', 'attachment; filename=demanda-'.$ticket->id.'.pdf');
+});
+
+it('requires all fields needed to generate a DFD', function () {
+    $this->actingAs(User::factory()->create())
+        ->post(route('chamados.store'), [
+            'subject' => 'Demanda incompleta',
+            'category' => 'novo_processo',
+            'description' => 'Problema identificado.',
+        ])
+        ->assertSessionHasErrors([
+            'demandante',
+            'demandado',
+            'solucao_sugerida',
+            'valor_estimado',
+            'data_demanda',
+            'duracao_contrato',
+        ]);
+});
+
+it('allows an employee to create and view their own contract ticket', function () {
+    $employee = User::factory()->create();
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Dúvida sobre contrato',
+            'category' => 'renovacao',
+            'description' => 'Preciso de orientação sobre o contrato.',
+            'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+        ])
+        ->assertRedirect();
+
+    $ticket = ContractTicket::firstOrFail();
+
+    expect($ticket->user_id)->toBe($employee->id)
+        ->and($ticket->status)->toBe('aberto');
+
+    $this->actingAs($employee)
+        ->get(route('chamados.show', $ticket))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Chamados/Show')
+            ->where('ticket.id', $ticket->id)
+            ->where('isAdmin', false)
+            ->where('ticket.user.id', $employee->id)
+            ->where('ticket.user.name', $employee->name)
+            ->missing('ticket.user.email')
+            ->missing('ticket.user.username')
+            ->missing('ticket.user.role')
+            ->missing('ticket.user.is_admin')
+            ->missing('auth.user.email')
+            ->missing('auth.user.username')
+            ->missing('auth.user.role')
+            ->missing('auth.user.is_admin'));
+
+    $this->get(route('chamados.pdf', $ticket))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf')
+        ->assertHeader('content-disposition', 'attachment; filename=demanda-'.$ticket->id.'.pdf');
+});
+
+it('requires and stores specifications, justification, and ficha for contract requests', function (string $category) {
+    $employee = User::factory()->create();
+    $dfdFields = $category === 'novo_processo' ? [
+        'demandante' => 'Secretaria de Administração',
+        'demandado' => 'Serviço de suporte',
+        'solucao_sugerida' => 'Contratar suporte especializado.',
+        'valor_estimado' => '1500.00',
+        'data_demanda' => '2026-11-03',
+        'duracao_contrato' => '12 meses',
+    ] : [];
+    $baseTicket = [
+        'subject' => 'Solicitação contratual',
+        'category' => $category,
+        'description' => 'Descrição da solicitação.',
+        ...$dfdFields,
+    ];
+
+    $expectedErrors = [
+        'specifications',
+        'justification',
+        'ficha',
+        'in_pca',
+        'involves_other_secretariats',
+    ];
+    if ($category !== 'novo_processo') {
+        $expectedErrors[] = 'attachments';
+    }
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), $baseTicket)
+        ->assertSessionHasErrors($expectedErrors);
+
+    $successData = [
+        ...$baseTicket,
+        'specifications' => 'Especificações do pedido.',
+        'justification' => 'Justificativa do pedido.',
+        'quantity' => '25',
+        'unit' => 'UN',
+        'ficha' => '123',
+        'dotacao' => '456',
+        'in_pca' => true,
+        'involves_other_secretariats' => false,
+    ];
+    if ($category !== 'novo_processo') {
+        $successData['attachments'] = [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')];
+    }
+
+    $this->post(route('chamados.store'), $successData)->assertRedirect();
+
+    $this->assertDatabaseHas('contract_tickets', [
+        'user_id' => $employee->id,
+        'category' => $category,
+        'specifications' => 'Especificações do pedido.',
+        'justification' => 'Justificativa do pedido.',
+        'quantity' => 25,
+        'unit' => 'UN',
+        'ficha' => '123',
+        'dotacao' => '456',
+        'in_pca' => true,
+        'involves_other_secretariats' => false,
+    ]);
+    if ($category === 'novo_processo') {
+        $this->assertDatabaseHas('contract_tickets', [
+            'category' => $category,
+            'demandante' => 'Secretaria de Administração',
+            'responsavel' => $employee->name,
+        ]);
+        expect((string) ContractTicket::latest('id')->firstOrFail()->valor_estimado)->toBe('1500.00');
+    }
+})->with(['novo_processo', 'compra_direta']);
+
+it('requires a valid unit when quantity is provided', function () {
+    $employee = User::factory()->create();
+    $requestData = [
+        'subject' => 'Demanda com unidade inválida',
+        'category' => 'novo_processo',
+        'description' => 'Descrição da demanda.',
+        'specifications' => 'Especificações.',
+        'justification' => 'Justificativa.',
+        'quantity' => '2',
+        'in_pca' => true,
+        'involves_other_secretariats' => false,
+        'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+    ];
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), $requestData)
+        ->assertSessionHasErrors(['unit']);
+
+    $this->post(route('chamados.store'), [...$requestData, 'unit' => 'KG'])
+        ->assertSessionHasErrors(['unit']);
+});
+
+it('rejects letters in ficha, dotacao, and additional ficha fields', function () {
+    $employee = User::factory()->create();
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Demanda com campos numéricos',
+            'category' => 'novo_processo',
+            'description' => 'Descrição da demanda.',
+            'specifications' => 'Especificações.',
+            'justification' => 'Justificativa.',
+            'quantity' => '2A',
+            'ficha' => '12A',
+            'dotacao' => '45B',
+            'in_pca' => true,
+            'involves_other_secretariats' => true,
+            'other_fichas' => ['67C'],
+            'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+        ])
+        ->assertSessionHasErrors(['quantity', 'ficha', 'dotacao', 'other_fichas.0']);
+});
+
+it('requires and stores additional fichas when a request involves other secretariats', function () {
+    $employee = User::factory()->create();
+    $requestData = [
+        'subject' => 'Solicitação para várias secretarias',
+        'category' => 'novo_processo',
+        'description' => 'Descrição da solicitação.',
+        'demandante' => 'Secretaria de Administração',
+        'demandado' => 'Serviço de suporte',
+        'solucao_sugerida' => 'Contratar suporte especializado.',
+        'valor_estimado' => '1500.00',
+        'data_demanda' => '2026-11-03',
+        'duracao_contrato' => '12 meses',
+        'specifications' => 'Especificações do pedido.',
+        'justification' => 'Justificativa do pedido.',
+        'ficha' => '12345',
+        'in_pca' => true,
+        'involves_other_secretariats' => true,
+    ];
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            ...$requestData,
+            'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+        ])
+        ->assertSessionHasErrors('other_fichas');
+
+    $this->post(route('chamados.store'), [
+        ...$requestData,
+        'other_fichas' => ['67890', '54321'],
+        'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+    ])->assertRedirect();
+
+    $ticket = ContractTicket::latest('id')->firstOrFail();
+
+    $this->assertDatabaseHas('contract_tickets', [
+        'id' => $ticket->id,
+        'in_pca' => true,
+        'involves_other_secretariats' => true,
+    ]);
+
+    expect($ticket->other_fichas)->toBe(['67890', '54321']);
+
+    $this->get(route('chamados.show', $ticket))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('ticket.in_pca', true)
+            ->where('ticket.involves_other_secretariats', true)
+            ->where('ticket.other_fichas.0', '67890')
+            ->where('ticket.other_fichas.1', '54321'));
+});
+
+it('does not allow submitting a contract demand that is not planned in the PCA', function () {
+    $employee = User::factory()->create();
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Demanda fora do PCA',
+            'category' => 'novo_processo',
+            'description' => 'Descrição da demanda.',
+            'specifications' => 'Especificações.',
+            'justification' => 'Justificativa.',
+            'ficha' => '123',
+            'in_pca' => false,
+            'involves_other_secretariats' => false,
+            'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+        ])
+        ->assertSessionHasErrors([
+            'in_pca' => 'Não é possível prosseguir com a demanda, pois ela não está prevista no PCA.',
+        ]);
+
+    $this->assertDatabaseMissing('contract_tickets', [
+        'subject' => 'Demanda fora do PCA',
+    ]);
+});
+
+it('does not require contract specifications and justification for renewal demands', function () {
+    $employee = User::factory()->create();
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Renovação de contrato',
+            'category' => 'renovacao',
+            'description' => 'Preciso de orientação.',
+            'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('contract_tickets', [
+        'user_id' => $employee->id,
+        'category' => 'renovacao',
+        'specifications' => null,
+        'justification' => null,
+        'ficha' => null,
+    ]);
+});
+
+it('allows opening a renewal ticket without contract specifications and justification', function () {
+    $employee = User::factory()->create();
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Renovação de contrato',
+            'category' => 'renovacao',
+            'description' => 'Solicito avaliar a renovação.',
+            'attachments' => [UploadedFile::fake()->create('dfd.pdf', 100, 'application/pdf')],
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('contract_tickets', [
+        'user_id' => $employee->id,
+        'category' => 'renovacao',
+        'specifications' => null,
+        'justification' => null,
+        'ficha' => null,
+    ]);
+});
+
+it('does not allow employees to view another employee ticket', function () {
+    $owner = User::factory()->create();
+    $otherEmployee = User::factory()->create();
+    $ticket = ContractTicket::create([
+        'user_id' => $owner->id,
+        'subject' => 'Solicitação privada',
+        'category' => 'outro',
+        'description' => 'Descrição.',
+    ]);
+
+    $this->actingAs($otherEmployee)
+        ->get(route('chamados.show', $ticket))
+        ->assertForbidden();
+
+    $this->get(route('chamados.pdf', $ticket))
+        ->assertForbidden();
+});
+
+it('allows managers and administrators to reply, assign, and update ticket status', function () {
+    $employee = User::factory()->create();
+    $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
+    $ticket = ContractTicket::create([
+        'user_id' => $employee->id,
+        'subject' => 'Solicitação de atendimento',
+        'category' => 'documentacao',
+        'description' => 'Descrição.',
+    ]);
+
+    $this->actingAs($employee)
+        ->patch(route('chamados.update', $ticket), [
+            'status' => 'resolvido',
+            'management_response' => 'Orientação.',
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($manager)
+        ->patch(route('chamados.update', $ticket), [
+            'status' => 'em_atendimento',
+            'management_response' => 'Estamos verificando sua solicitação.',
+            'responsible_user_id' => $manager->id,
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('contract_tickets', [
+        'id' => $ticket->id,
+        'status' => 'em_atendimento',
+        'management_response' => 'Estamos verificando sua solicitação.',
+        'responsible_user_id' => $manager->id,
+    ]);
+});
+
+it('allows the ticket owner and managers to exchange conversation messages', function () {
+    $employee = User::factory()->create();
+    $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
+    $otherEmployee = User::factory()->create();
+    $ticket = ContractTicket::create([
+        'user_id' => $employee->id,
+        'subject' => 'Solicitação com conversa',
+        'category' => 'renovacao',
+        'description' => 'Preciso de uma orientação.',
+    ]);
+
+    $this->actingAs($employee)
+        ->post(route('chamados.messages.store', $ticket), [
+            'message' => 'Envio informações adicionais.',
+        ])
+        ->assertRedirect();
+
+    $this->actingAs($manager)
+        ->post(route('chamados.messages.store', $ticket), [
+            'message' => 'Recebemos as informações. Vamos analisar.',
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('contract_ticket_messages', [
+        'contract_ticket_id' => $ticket->id,
+        'user_id' => $employee->id,
+        'message' => 'Envio informações adicionais.',
+    ]);
+    $this->assertDatabaseHas('contract_ticket_messages', [
+        'contract_ticket_id' => $ticket->id,
+        'user_id' => $manager->id,
+        'message' => 'Recebemos as informações. Vamos analisar.',
+    ]);
+
+    $this->actingAs($employee)
+        ->get(route('chamados.show', $ticket))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('ticket.messages', 2)
+            ->where('ticket.messages.0.message', 'Envio informações adicionais.')
+            ->where('ticket.messages.0.author.name', $employee->name)
+            ->where('ticket.messages.0.author.is_manager', false)
+            ->where('ticket.messages.1.message', 'Recebemos as informações. Vamos analisar.')
+            ->where('ticket.messages.1.author.name', $manager->name)
+            ->where('ticket.messages.1.author.is_manager', true)
+            ->missing('ticket.messages.1.author.role'));
+
+    $this->actingAs($otherEmployee)
+        ->post(route('chamados.messages.store', $ticket), [
+            'message' => 'Esta mensagem não deve ser aceita.',
+        ])
+        ->assertForbidden();
+
+    $this->actingAs($employee)
+        ->post(route('chamados.messages.store', $ticket), ['message' => ''])
+        ->assertSessionHasErrors('message');
+});
+
+it('allows managers and administrators to approve or refuse a ticket once', function () {
+    $employee = User::factory()->create();
+    $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
+    $admin = User::factory()->create(['role' => User::ROLE_ADMINISTRATOR]);
+    $approvalTicket = ContractTicket::create([
+        'user_id' => $employee->id,
+        'subject' => 'Solicitação para aprovar',
+        'category' => 'documentacao',
+        'description' => 'Descrição.',
+    ]);
+    $refusalTicket = ContractTicket::create([
+        'user_id' => $employee->id,
+        'subject' => 'Solicitação para recusar',
+        'category' => 'documentacao',
+        'description' => 'Descrição.',
+    ]);
+
+    $this->actingAs($employee)
+        ->patch(route('chamados.decide', $approvalTicket), ['status' => 'aprovado'])
+        ->assertForbidden();
+
+    $this->actingAs($manager)
+        ->patch(route('chamados.decide', $approvalTicket), ['status' => 'aprovado'])
+        ->assertRedirect();
+
+    $this->actingAs($admin)
+        ->patch(route('chamados.decide', $refusalTicket), ['status' => 'recusado'])
+        ->assertRedirect();
+
+    $this->patch(route('chamados.decide', $approvalTicket), ['status' => 'recusado'])
+        ->assertStatus(409);
+
+    $this->assertDatabaseHas('contract_tickets', [
+        'id' => $approvalTicket->id,
+        'status' => 'aprovado',
+    ]);
+    $this->assertDatabaseHas('contract_tickets', [
+        'id' => $refusalTicket->id,
+        'status' => 'recusado',
+    ]);
+});
+
+it('allows managers to view all tickets and download their attachments', function () {
+    Storage::fake('local');
+    $employee = User::factory()->create();
+    $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
+    $ticket = ContractTicket::create([
+        'user_id' => $employee->id,
+        'responsible_user_id' => $manager->id,
+        'subject' => 'Chamado visível para o gestor',
+        'category' => 'documentacao',
+        'description' => 'Descrição.',
+    ]);
+    $attachment = $ticket->attachments()->create([
+        'original_name' => 'documento.pdf',
+        'file_path' => 'contract-ticket-attachments/'.$ticket->id.'/documento.pdf',
+        'mime_type' => 'application/pdf',
+        'file_size' => 10,
+    ]);
+    Storage::disk('local')->put($attachment->file_path, 'documento');
+
+    $this->actingAs($manager)
+        ->get(route('chamados.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('canManage', true)
+            ->where('isAdmin', false)
+            ->has('tickets.data', 1)
+            ->where('tickets.data.0.user.id', $employee->id)
+            ->missing('tickets.data.0.user.email')
+            ->missing('tickets.data.0.user.username')
+            ->missing('tickets.data.0.user.role')
+            ->missing('tickets.data.0.user.is_admin')
+            ->where('tickets.data.0.responsible.id', $manager->id)
+            ->missing('tickets.data.0.responsible.email')
+            ->missing('tickets.data.0.responsible.username')
+            ->missing('tickets.data.0.responsible.role')
+            ->missing('tickets.data.0.responsible.is_admin'));
+
+    $this->get(route('chamados.show', $ticket))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('ticket.responsible.id', $manager->id)
+            ->missing('ticket.responsible.email')
+            ->missing('ticket.responsible.username')
+            ->missing('ticket.responsible.role')
+            ->missing('ticket.responsible.is_admin')
+            ->where('responsibles.0.id', $manager->id)
+            ->missing('responsibles.0.email')
+            ->missing('responsibles.0.username')
+            ->missing('responsibles.0.role')
+            ->missing('responsibles.0.is_admin'));
+    $this->get(route('chamados.attachments.download', $attachment))->assertOk();
+});
+
+it('only allows administrators to delete tickets', function () {
+    $employee = User::factory()->create();
+    $ticket = ContractTicket::create([
+        'user_id' => $employee->id,
+        'subject' => 'Chamado para excluir',
+        'category' => 'outro',
+        'description' => 'Descrição.',
+    ]);
+
+    $this->actingAs($employee)
+        ->delete(route('chamados.destroy', $ticket))
+        ->assertForbidden();
+
+    $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
+    $this->actingAs($manager)
+        ->delete(route('chamados.destroy', $ticket))
+        ->assertForbidden();
+
+    $admin = User::factory()->create(['role' => User::ROLE_ADMINISTRATOR]);
+    $this->actingAs($admin)
+        ->delete(route('chamados.destroy', $ticket))
+        ->assertRedirect(route('chamados.index'));
+
+    $this->assertDatabaseMissing('contract_tickets', ['id' => $ticket->id]);
+});
+
+it('does not allow assigning a regular user as responsible', function () {
+    $employee = User::factory()->create();
+    $admin = User::factory()->create(['role' => User::ROLE_ADMINISTRATOR]);
+    $ticket = ContractTicket::create([
+        'user_id' => $employee->id,
+        'subject' => 'Chamado com responsável inválido',
+        'category' => 'outro',
+        'description' => 'Descrição.',
+    ]);
+
+    $this->actingAs($admin)
+        ->patch(route('chamados.update', $ticket), [
+            'status' => 'aberto',
+            'management_response' => null,
+            'responsible_user_id' => $employee->id,
+        ])
+        ->assertSessionHasErrors('responsible_user_id');
+});
+
+it('allows employees to attach files to their tickets and download them', function () {
+    Storage::fake('local');
+    $employee = User::factory()->create();
+    $file = UploadedFile::fake()->create('documento.pdf', 100, 'application/pdf');
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Chamado com anexo',
+            'category' => 'renovacao',
+            'description' => 'Segue o documento para análise.',
+            'attachments' => [$file],
+        ])
+        ->assertRedirect();
+
+    $attachment = ContractTicketAttachment::firstOrFail();
+    Storage::disk('local')->assertExists($attachment->file_path);
+
+    $this->actingAs($employee)
+        ->get(route('chamados.attachments.download', $attachment))
+        ->assertOk()
+        ->assertHeader('content-disposition', 'attachment; filename=documento.pdf');
+});
+
+it('prevents users from downloading attachments belonging to another user', function () {
+    Storage::fake('local');
+    $owner = User::factory()->create();
+    $otherEmployee = User::factory()->create();
+    $ticket = ContractTicket::create([
+        'user_id' => $owner->id,
+        'subject' => 'Chamado privado',
+        'category' => 'outro',
+        'description' => 'Descrição.',
+    ]);
+    Storage::disk('local')->put('contract-ticket-attachments/1/teste.pdf', 'conteúdo');
+    $attachment = $ticket->attachments()->create([
+        'original_name' => 'teste.pdf',
+        'file_path' => 'contract-ticket-attachments/1/teste.pdf',
+        'mime_type' => 'application/pdf',
+        'file_size' => 9,
+    ]);
+
+    $this->actingAs($otherEmployee)
+        ->get(route('chamados.attachments.download', $attachment))
+        ->assertForbidden();
+});
+
+it('requires at least one PDF attachment and rejects other file types', function () {
+    $employee = User::factory()->create();
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Chamado sem anexo',
+            'category' => 'outro',
+            'description' => 'Descrição.',
+        ])
+        ->assertSessionHasErrors('attachments');
+
+    $this->actingAs($employee)
+        ->post(route('chamados.store'), [
+            'subject' => 'Chamado com formato inválido',
+            'category' => 'outro',
+            'description' => 'Descrição.',
+            'attachments' => [UploadedFile::fake()->create('programa.exe', 50, 'application/x-msdownload')],
+        ])
+        ->assertSessionHasErrors('attachments.0');
+});

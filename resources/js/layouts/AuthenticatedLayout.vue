@@ -1,10 +1,10 @@
 <script setup>
 import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import ApplicationLogo from '@/components/ApplicationLogo.vue';
+import Dropdown from '@/components/Dropdown.vue';
+import DropdownLink from '@/components/DropdownLink.vue';
+import NavLink from '@/components/NavLink.vue';
+import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -39,12 +39,6 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
-                                <NavLink
-                                    :href="route('contracts.create')"
-                                    :active="route().current('contracts.create')"
-                                >
-                                    Novo Contrato
-                                </NavLink>
                             </div>
                         </div>
 
@@ -78,7 +72,9 @@ const showingNavigationDropdown = ref(false);
 
                                     <template #content>
                                         <DropdownLink
-                                            :href="route('profile.edit')"
+                                            :href="
+                                                route('settings.profile.edit')
+                                            "
                                         >
                                             Profile
                                         </DropdownLink>
@@ -152,12 +148,6 @@ const showingNavigationDropdown = ref(false);
                         >
                             Dashboard
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('contracts.create')"
-                            :active="route().current('contracts.create')"
-                        >
-                            Novo Contrato
-                        </ResponsiveNavLink>
                     </div>
 
                     <!-- Responsive Settings Options -->
@@ -171,12 +161,13 @@ const showingNavigationDropdown = ref(false);
                                 {{ $page.props.auth.user.name }}
                             </div>
                             <div class="text-sm font-medium text-gray-500">
-                                {{ $page.props.auth.user.email }}
                             </div>
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
+                            <ResponsiveNavLink
+                                :href="route('settings.profile.edit')"
+                            >
                                 Profile
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
